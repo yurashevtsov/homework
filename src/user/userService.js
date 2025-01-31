@@ -1,6 +1,6 @@
 "use strict";
 
-const { User } = require("@src/associations/index");
+const User = require("@src/user/userModel");
 const passwordService = require("@src/auth/passwordService.js");
 const jwtService = require("@src/auth/jwtService.js");
 const AppFeatures = require("@src/utils/appFeatures.js");

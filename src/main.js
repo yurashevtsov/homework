@@ -2,13 +2,14 @@
 
 // module for easy aliases
 require("module-alias/register");
-require("@src/associations/index");
 
 // config must be required first for everything below to access it
 const config = require("@src/config");
 const app = require("@src/app.js");
 
 const db = require("@src/database/db.js");
+const defineAssociations = require("@src/associations/index.js");
+defineAssociations();
 
 // when database connected, only then listen for requests
 db.initDB().then(() => {
