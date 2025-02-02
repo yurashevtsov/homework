@@ -12,24 +12,8 @@ const sequelize = new Sequelize({
   host: config.dbHost,
   database: config.dbName,
   dialect: config.dbDialect,
-  port: config.dbPort
+  port: config.dbPort,
 });
-
-// import models here (a function that accepts sequelize instance and initializes the model), for of loop, throw sequelize into them to "define models"
-// const modelDefiners = [
-//   require("@src/comment/commentModel"),
-//   require("@src/user/userModel"),
-//   require("@src/post/postModel"),
-//   // Add more models here...
-// ];
-
-// // passes sequelize instance to models to actually define the model
-// for (let modelDefiner of modelDefiners) {
-//   modelDefiner(sequelize);
-// }
-
-// // actually making associations between models
-// applyExtraSetup(sequelize);
 
 // initializing connection to db
 async function initDB() {
@@ -46,7 +30,4 @@ async function initDB() {
 module.exports = {
   sequelizeInstance: sequelize,
   initDB,
-  User: sequelize.models.user,
-  Post: sequelize.models.post,
-  Comment: sequelize.models.comment,
 };
