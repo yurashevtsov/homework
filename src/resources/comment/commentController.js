@@ -1,9 +1,7 @@
 "use strict";
 
 const catchAsync = require("@src/utils/catchAsync.js");
-const User = require("@src/user/userModel");
-const Post = require("@src/post/postModel");
-const Comment = require("@src/comment/commentModel");
+const { User, Post, Comment } = require("@src/associations/models/index.js");
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 
 /* COMMENT: id, content, postId, userId, createdAt

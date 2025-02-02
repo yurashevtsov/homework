@@ -4,7 +4,7 @@ const { Sequelize, DataTypes, Model } = require("sequelize");
 const { sequelizeInstance } = require("@src/database/db");
 
 class Comment extends Model {}
-// Таблица Comments
+
 Comment.init(
   {
     id: {

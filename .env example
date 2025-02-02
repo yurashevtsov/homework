@@ -2,7 +2,13 @@ NODE_ENV = development
 SERVER_PORT = 3000
 JWT_SECRET = akjndsakjdn2kajnda2dnakdsnu2nda98n2daiudbnsauidb@DbhjASDjbdjbaj2bdJH@ADBjhasdbHj2bdhabj2hABDajdbjhdzxkjdhbjbq2jhbdasbdjabdasjdbajdbasjdbadjbsdjabsdjasbdjasbdjabd
 JWT_EXPIRES_IN = 7d
-DATABASE_NAME = homework
+# 1 of these databases
+# at work pc 
+DATABASE_NAME = homework 
+# 2 at home
+DATABASE_NAME = practicedb 
+DATABASE_NAME = many_to_many 
+
 DATABASE_USER = root
 DATABASE_PASSWORD = admin
 DATABASE_PORT = 3306

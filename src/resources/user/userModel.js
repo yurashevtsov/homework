@@ -2,7 +2,7 @@
 
 const { DataTypes, Model } = require("sequelize");
 const passwordService = require("@src/auth/passwordService.js");
-const { sequelizeInstance } = require("@src/database/db");
+const { sequelizeInstance } = require("@src/database/db.js");
 
 class User extends Model {
   toJSON() {

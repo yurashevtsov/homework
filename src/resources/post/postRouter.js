@@ -1,7 +1,7 @@
 "use strict";
 
 const routerInstance = require("express").Router();
-const postController = require("@src/post/postController");
+const postController = require("@src/resources/post/postController");
 const authMiddleware = require("@src/auth/authorization.middleware.js");
 
 routerInstance.use(authMiddleware.tokenAuthHandler); // middleware to validate token before accessing routes AND attach a user to the request

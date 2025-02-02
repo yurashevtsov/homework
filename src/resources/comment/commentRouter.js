@@ -1,7 +1,7 @@
 "use strict";
 
 const routerInstance = require("express").Router();
-const commentController = require("@src/comment/commentController");
+const commentController = require("@src/resources/comment/commentController.js");
 const authMiddleware = require("@src/auth/authorization.middleware.js");
 
 routerInstance.use(authMiddleware.tokenAuthHandler);

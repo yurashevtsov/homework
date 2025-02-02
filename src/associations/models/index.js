@@ -1,8 +1,8 @@
 "use strict";
 
-const User = require("@src/user/userModel.js");
-const Post = require("@src/post/postModel.js");
-const Comment = require("@src/comment/commentModel.js");
+const User = require("@src/resources/user/userModel.js");
+const Post = require("@src/resources/post/postModel.js");
+const Comment = require("@src/resources/comment/commentModel.js");
 
 module.exports = {
   User,

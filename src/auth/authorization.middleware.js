@@ -1,7 +1,7 @@
 "use strict";
 
 const jwtService = require("@src/auth/jwtService.js");
-const userService = require("@src/user/userService.js");
+const userService = require("@src/resources/user/userService.js");
 const catchAsync = require("@src/utils/catchAsync.js");
 
 const {

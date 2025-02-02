@@ -1,10 +1,10 @@
 "use strict";
 
 const routerInstance = require("express").Router();
-const userController = require("@src/user/userController.js");
+const userController = require("@src/resources/user/userController.js");
 const joiMiddleware = require("@src/middleware/joiMiddleware.js");
 const authMiddleware = require("@src/auth/authorization.middleware.js");
-const userValidationSchema = require("@src/user/userValidationSchema.js");
+const userValidationSchema = require("@src/resources/user/userValidationSchema.js");
 
 // SIGNUP
 routerInstance.post(

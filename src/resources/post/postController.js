@@ -1,7 +1,8 @@
 "use strict";
 
-const catchAsync = require("@src/utils/catchAsync");
-const Post = require("@src/post/postModel");
+const catchAsync = require("@src/utils/catchAsync.js");
+// const Post = require("@src/resources/post/postModel");
+const { Post } = require("@src/associations/models/index.js");
 const HttpNotFoundError = require("@src/utils/httpErrors/httpNotFoundError");
 const HttpUnauthorizedError = require("@src/utils/httpErrors/httpUnauthorizedError");
 
