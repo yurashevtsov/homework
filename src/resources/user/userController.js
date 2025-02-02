@@ -5,24 +5,18 @@ const userService = require("./userService.js");
 
 async function signup(req, res) {
   // allowed fields: username, email, password, avatar - handled by Joi middleware
-  const { user, token } = await userService.userSignup(req.body);
+  const data = await userService.userSignup(req.body);
 
-  res.status(201).send({
-    user,
-    token,
-  });
+  res.status(201).send(data);
 }
 
 async function login(req, res) {
-  const { user, token } = await userService.authenticateUser(
+  const data = await userService.authenticateUser(
     req.body.email,
     req.body.password
   );
 
-  res.status(200).send({
-    user,
-    token,
-  });
+  res.status(200).send(data);
 }
 
 async function getAllUsers(req, res) {
