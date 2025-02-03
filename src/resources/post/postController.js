@@ -2,9 +2,12 @@
 
 const catchAsync = require("@src/utils/catchAsync.js");
 // const Post = require("@src/resources/post/postModel");
-const { Post } = require("@src/associations/models/index.js");
-const HttpNotFoundError = require("@src/utils/httpErrors/httpNotFoundError");
-const HttpUnauthorizedError = require("@src/utils/httpErrors/httpUnauthorizedError");
+const { Post, Tag, PostTag } = require("@src/associations/models/index.js");
+const {
+  HttpNotFoundError,
+  HttpUnauthorizedError,
+  HttpBadRequestError,
+} = require("@src/utils/httpErrors");
 
 /*
 	{
@@ -12,6 +15,7 @@ const HttpUnauthorizedError = require("@src/utils/httpErrors/httpUnauthorizedErr
 		content: "post content",
 		userId: userId,
 	}
+    with addition of many to many relationships - tags, now it will have tagId as well
 */
 
 async function getAllPosts(req, res) {
@@ -19,6 +23,11 @@ async function getAllPosts(req, res) {
     where: {
       userId: req.user.id,
     },
+    include: [
+      {
+        association: "tags",
+      },
+    ],
   });
 
   res.status(200).send(allPosts);
@@ -31,6 +40,12 @@ async function getOnePost(req, res, next) {
 
   const post = await Post.findOne({
     where: { id: req.params.id, userId: req.user.id },
+    include: [
+      {
+        model: Tag,
+        as: "tags",
+      },
+    ],
   });
 
   if (!post) {
@@ -40,9 +55,33 @@ async function getOnePost(req, res, next) {
   res.status(200).send(post);
 }
 
-async function createPost(req, res, next) {
-  if (!req.user.id) {
-    return next(new HttpUnauthorizedError("Unauthorized")); // 401 Unauthorized
+// creates a new post WITH tags
+async function createPost(req, res) {
+  // lowercase tag name
+  const tagsArray = req.body.tags
+    .split(",")
+    .map((tag) => tag.toLowerCase().trim());
+
+  if (!req.body.tags) {
+    throw new HttpBadRequestError("No tags provided.");
+  }
+
+  let createdOrFetchedTags;
+  try {
+    // find or create new tags
+    createdOrFetchedTags = await Promise.all(
+      tagsArray.map(async (tagName) => {
+        // because findOrCreate returns an array of 2 items - found or created instance AND boolean - true/false depends if it was created or found
+        const tag = await Tag.findOrCreate({
+          where: { name: tagName },
+          defaults: { name: tagName },
+        });
+        return tag[0];
+      })
+    );
+  } catch (err) {
+    console.log(err.message);
+    throw new HttpBadRequestError("Error during creating tags.");
   }
 
   const newPost = await Post.create({
@@ -51,9 +90,13 @@ async function createPost(req, res, next) {
     userId: req.user.id,
   });
 
+  await newPost.setTags(createdOrFetchedTags);
+
   res.status(201).send(newPost);
 }
 
+// updates a post
+// can update tags by names - passing a string of tags
 async function updatePost(req, res, next) {
   if (!req.user.id) {
     return next(new HttpUnauthorizedError("Unauthorized")); // 401 Unauthorized
@@ -71,6 +114,26 @@ async function updatePost(req, res, next) {
     title: req.body.title,
     content: req.body.content,
   });
+
+  // if we want to update tags on the post
+  if (req.body.tags) {
+    const tagsArray = req.body.tags
+      .split(",")
+      .map((tag) => tag.toLowerCase().trim());
+
+      // find or create new tags
+    const foundTags = await Promise.all(
+      tagsArray.map(async (tagName) => {
+        const tag = await Tag.findOrCreate({
+          where: { name: tagName },
+          defaults: { name: tagName },
+        });
+        return tag[0];
+      })
+    );
+
+    await foundPost.setTags(foundTags);
+  }
 
   await foundPost.save();
 

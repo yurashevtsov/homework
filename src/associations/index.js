@@ -26,13 +26,19 @@ function defineAssociations() {
   */
 
   // ! ok, look into advanced associations, figure out if its worth it, then correct all resources behaviours
-  Post.belongsToMany(Tag, { as: "tags", through: PostTag });
-  Tag.belongsToMany(Post, { as: "posts", through: PostTag });
+  Post.belongsToMany(Tag, {
+    as: "tags",
+    through: PostTag,
+  });
+  Tag.belongsToMany(Post, {
+    as: "posts",
+    through: PostTag,
+  });
   /*
       Many to many query: 
       await Post.findAll({ 
-        include: [{ model: Tag, as: "tags" }],
         where: { userId: req.user.id },
+        include: [{ model: Tag, as: "tags" }],
       });
   */
 
@@ -40,6 +46,7 @@ function defineAssociations() {
   PostTag.belongsTo(Post);
   Tag.hasMany(PostTag);
   PostTag.belongsTo(Tag);
+
   /*
   ALLOWS TO QUERY JUNCTION TABLE and VICA VERSA
   Post.findAll({ include: PostTag }); // finds all posts and gets junction model, may be get junction model attribute w/o 3rd model
