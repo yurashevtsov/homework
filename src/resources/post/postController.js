@@ -15,7 +15,7 @@ const {
 		content: "post content",
 		userId: userId,
 	}
-    with addition of many to many relationships - tags, now it will have tagId as well
+    with addition of many to many relationships - `tags` can be eager loaded along with it
 */
 
 async function getAllPosts(req, res) {
@@ -121,7 +121,7 @@ async function updatePost(req, res, next) {
       .split(",")
       .map((tag) => tag.toLowerCase().trim());
 
-      // find or create new tags
+    // find or create new tags
     const foundTags = await Promise.all(
       tagsArray.map(async (tagName) => {
         const tag = await Tag.findOrCreate({

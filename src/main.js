@@ -12,8 +12,12 @@ const defineAssociations = require("@src/associations/index.js");
 defineAssociations();
 
 // when database connected, only then listen for requests
-db.initDB().then(() => {
+async function startApp() {
+  await db.initDB();
+
   app.listen(config.serverPort, () => {
     console.log(`Server is running on port ${config.serverPort}`);
   });
-});
+}
+
+startApp();
