@@ -100,7 +100,7 @@ async function createPostWithTags(userId, postData) {
     if (tagsToAssociate.length > 0) {
       await newPost.setTags(tagsToAssociate, { transaction: transaction });
     }
-    console.log("Committing?");
+
     await transaction.commit();
 
     return { ...newPost.toJSON(), tags: tagsToAssociate.map((t) => t.name) };
@@ -137,9 +137,12 @@ async function updatePostWithTags(postId, userId, postData) {
 
     // if tags field present, we find/create tags to later associate them
     if (postData.tags) {
-      const tags = await tagService.findOrCreateTags(postData.tags);
+      const tags = await tagService.findOrCreateTags(
+        postData.tags,
+        transaction
+      );
 
-      await postToUpdate.setTags(tags);
+      await postToUpdate.setTags(tags, { transaction });
 
       return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
     }

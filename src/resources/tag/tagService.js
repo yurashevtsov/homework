@@ -63,42 +63,35 @@ async function deleteTagById(id) {
  * @returns {object}  object containing all tags
  */
 async function findOrCreateTags(tagNamesArr, transaction) {
-  // just in case its a string with names
   if (typeof tagNamesArr === "string") {
     tagNamesArr = tagNamesArr.split(",").map((t) => t.trim());
   }
 
-  //1. figure out which tags I already have
-  // fetching already existing tags from the database
+  tagNamesArr = [...new Set(tagNamesArr)]; // in case of dublicates
+
+  // Getting existing tags
   const fetchedTags = await Tag.findAll({
     where: {
       name: { [Op.in]: tagNamesArr },
     },
   });
 
-  // if tags fetched less than requested, I need to create tags that I dont have
-  if (fetchedTags.length < tagNamesArr.length) {
-    const exitingTagsNames = fetchedTags
-      .map((tag) => tag.name.trim())
-      .join(",");
+  const existingTagNamesSet = new Set(
+    fetchedTags.map((tag) => tag.name.trim())
+  );
+  const tagsToCreate = tagNamesArr
+    .filter((tagName) => !existingTagNamesSet.has(tagName))
+    .map((tagName) => ({ name: tagName }));
 
-    // 2. figure out which tags I dont have yet (with array filter)
-    const tagsToCreate = tagNamesArr
-      .filter((tagName) => !exitingTagsNames.includes(tagName))
-      .map((tagName) => ({ name: tagName }));
-
-    //3. then use bulk create on whatever I dont have yet
+  if (tagsToCreate.length > 0) {
     const createdTags = await Tag.bulkCreate(tagsToCreate, {
       validate: true,
       transaction,
     });
-
-    //4. join 2 arrays - arrays of existing tags and newly created tags
-    return [...createdTags, ...fetchedTags];
-  } else {
-    // IF all tags were existing then return fetched tags
-    return fetchedTags;
+    return [...fetchedTags, ...createdTags];
   }
+
+  return fetchedTags; // Если все теги уже существуют
 }
 
 module.exports = {
