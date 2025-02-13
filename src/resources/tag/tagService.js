@@ -44,7 +44,7 @@ async function updateTagById(id, tagData) {
 }
 
 async function deleteTagById(id) {
-  const tagToDelete = await Tag.destroy({
+  const tagToDelete = await Tag.findOne({
     where: { id },
   });
 

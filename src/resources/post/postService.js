@@ -2,6 +2,7 @@ const { Post, Tag } = require("@src/associations/models/index");
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 // const { Sequelize } = require("sequelize");
 const tagService = require("@src/resources/tag/tagService");
+const appFeatures = require("@src/utils/appFeatures.js");
 
 // logged in user posts without tags
 async function getAllPostsNoTags(userId) {
@@ -13,20 +14,23 @@ async function getAllPostsNoTags(userId) {
 }
 
 // logged in user's posts WITH tags
-async function getAllPostsWithTags(userId) {
-  return await Post.findAll({
+async function getAllPostsWithTags(userId, queryParams) {
+  const initQuery = {
     where: {
       userId,
     },
     include: {
-      // association: "tags",
       model: Tag,
       as: "tags",
       through: {
         attributes: [],
       },
     },
-  });
+  };
+
+  const { databaseQuery } = new appFeatures(initQuery, queryParams);
+
+  return await Post.findAll(databaseQuery);
 }
 
 // logged in user post without tags

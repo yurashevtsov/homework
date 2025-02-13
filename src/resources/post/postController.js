@@ -3,9 +3,10 @@
 const catchAsync = require("@src/utils/catchAsync.js");
 const postService = require("@src/resources/post/postService");
 
-
 async function getAllPosts(req, res) {
-  res.status(200).send(await postService.getAllPostsWithTags(req.user.id));
+  res
+    .status(200)
+    .send(await postService.getAllPostsWithTags(req.user.id, req.query));
 }
 
 async function getOnePost(req, res) {

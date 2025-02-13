@@ -57,20 +57,10 @@ async function userSignup(userData) {
   };
 }
 
-async function getAllUsers(queryObj) {
-  const { databaseQuery } = new AppFeatures({}, queryObj)
-    .sort()
-    .paginate()
-    .limitFields();
+async function getAllUsers(queryParams) {
+  const { databaseQuery } = new AppFeatures({}, queryParams);
 
-  const data = await User.findAndCountAll(databaseQuery);
-
-  return {
-    total: data.count,
-    totalPages: Math.ceil(data.count / databaseQuery.limit),
-    currentPage: databaseQuery.page,
-    data: data.rows,
-  };
+  return await User.findAll(databaseQuery);
 }
 
 async function getUserById(id) {
