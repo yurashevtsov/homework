@@ -62,7 +62,7 @@ async function deleteTagById(id) {
  * @param {string[]} tagNamesArr an array of tag names ["meme", "sports" "politics"]
  * @returns {object}  object containing all tags
  */
-async function findOrCreateTags(tagNamesArr) {
+async function findOrCreateTags(tagNamesArr, transaction) {
   // just in case its a string with names
   if (typeof tagNamesArr === "string") {
     tagNamesArr = tagNamesArr.split(",").map((t) => t.trim());
@@ -88,7 +88,10 @@ async function findOrCreateTags(tagNamesArr) {
       .map((tagName) => ({ name: tagName }));
 
     //3. then use bulk create on whatever I dont have yet
-    const createdTags = await Tag.bulkCreate(tagsToCreate, { validate: true });
+    const createdTags = await Tag.bulkCreate(tagsToCreate, {
+      validate: true,
+      transaction,
+    });
 
     //4. join 2 arrays - arrays of existing tags and newly created tags
     return [...createdTags, ...fetchedTags];
