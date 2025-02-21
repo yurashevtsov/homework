@@ -7,7 +7,7 @@ const helpers = require("@src/utils/helpers");
 // should I call it features schema...? I need to be a bit more precise as its not the only possible query that might be
 /**
  * @typedef {Object} Query
- * @property {string[]} [fields] - attributes/fields
+ * @property {string} [fields] - attributes/fields, will be converted to an array by Joi
  * @property {number} [page=1] - page number (needs to calculate how many records to skip)
  * @property {number} [limit=100] - number of items per page
  * @property {string[]} [order] - order by field - array of strings like ["name_asc", "age_desc"]

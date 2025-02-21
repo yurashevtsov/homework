@@ -15,7 +15,7 @@ const postCreateSchema = Joi.object({
       Joi.array().items(Joi.string()),
       Joi.string().custom(helpers.convertStringToArrayForJoi)
     )
-    .optional(),
+    .required(), // at least 1 tag
 });
 
 module.exports = {

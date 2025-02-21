@@ -1,7 +1,15 @@
 "use strict";
 
 const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, "..", "..", ".env") });
+
+const configEnv =
+  process.env.NODE_ENV === "production"
+    ? ".env.production.local"
+    : process.env.NODE_ENV === "development"
+    ? ".env.development.local"
+    : ".env.test.local";
+
+require("dotenv").config({ path: path.join(__dirname, "..", "..", configEnv) });
 
 module.exports = Object.freeze({
   /** @type {string} */

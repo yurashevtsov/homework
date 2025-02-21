@@ -2,9 +2,6 @@
 
 const config = require("@src/config");
 const { Sequelize } = require("sequelize");
-// const {
-//   applyExtraSetup,
-// } = require("@src/database/extra-setup");
 
 const sequelize = new Sequelize({
   username: config.dbUser,

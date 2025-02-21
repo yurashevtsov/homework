@@ -112,8 +112,6 @@ async function createPostWithTags(userId, postData) {
 
 // TODO: create update handler
 async function updatePostWithTags(postId, userId, postData) {
-  const transaction = await sequelizeInstance.transaction();
-
   const postToUpdate = await Post.findOne({
     where: {
       id: postId,
@@ -131,27 +129,23 @@ async function updatePostWithTags(postId, userId, postData) {
     throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
   }
 
+  // start transaction only if post exists
+  const transaction = await sequelizeInstance.transaction();
+
   try {
+    // updating the post
     postToUpdate.set({ postData });
     await postToUpdate.save();
-
-    // if tags field present, we find/create tags to later associate them
-    if (postData.tags) {
-      const tags = await tagService.findOrCreateTags(
-        postData.tags,
-        transaction
-      );
-
-      await postToUpdate.setTags(tags, { transaction });
-
-      return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
-    }
-
+    // looking for tags
+    const tags = await tagService.findOrCreateTags(postData.tags, transaction);
+    // creating association
+    await postToUpdate.setTags(tags, { transaction });
+    // commiting transaction
     await transaction.commit();
 
-    return postToUpdate;
+    return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
   } catch (err) {
-    await transaction.rollback();
+    await transaction.rollback(); // in case of an error abort the changes to DB
     throw err;
   }
 }
