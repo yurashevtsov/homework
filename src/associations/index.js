@@ -17,6 +17,7 @@ function defineAssociations() {
 
   Post.hasMany(PostTag);
   PostTag.belongsTo(Post);
+  
   Tag.hasMany(PostTag);
   PostTag.belongsTo(Tag);
 }
