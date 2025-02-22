@@ -11,6 +11,8 @@ const db = require("@src/database/models/sequelize_db");
 
 // when database connected, only then listen for requests
 async function startApp() {
+  console.log(`Work environment: ${process.env.NODE_ENV}`);
+
   await db.sequelize.authenticate();
   console.log("Connection to the database has been established successfully.");
 

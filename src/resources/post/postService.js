@@ -1,8 +1,14 @@
-const { Post, Tag } = require("@src/associations/models/index");
+// const { Post, Tag } = require("@src/associations/models/index");
+// I need both - post and tag models
+/**
+ * @type {import('sequelize').Sequelize}
+ */
+const sequelize = require("@src/database/models/sequelize_db").sequelize;
+const { Post } = sequelize.models;
+
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 const tagService = require("@src/resources/tag/tagService");
 const appFeatures = require("@src/utils/appFeatures.js");
-const { sequelizeInstance } = require("@src/database/db");
 
 // logged in user posts without tags
 async function getAllPostsNoTags(userId, queryParams) {
