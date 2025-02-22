@@ -1,5 +1,4 @@
-// const { Post, Tag } = require("@src/associations/models/index");
-// I need both - post and tag models
+"use strict";
 /**
  * @type {import('sequelize').Sequelize}
  */
@@ -25,25 +24,24 @@ async function getAllPostsNoTags(userId, queryParams) {
 }
 
 // logged in user's posts WITH tags
-//!commented out temporarily for testing migrations
-// async function getAllPostsWithTags(userId, queryParams) {
-//   const initQuery = {
-//     where: {
-//       userId,
-//     },
-//     include: {
-//       model: Tag,
-//       as: "tags",
-//       through: {
-//         attributes: [],
-//       },
-//     },
-//   };
+async function getAllPostsWithTags(userId, queryParams) {
+  const initQuery = {
+    where: {
+      userId,
+    },
+    include: {
+      model: Tag,
+      as: "tags",
+      through: {
+        attributes: [],
+      },
+    },
+  };
 
-//   const { databaseQuery } = new appFeatures(initQuery, queryParams);
+  const { databaseQuery } = new appFeatures(initQuery, queryParams);
 
-//   return await Post.findAll(databaseQuery);
-// }
+  return await Post.findAll(databaseQuery);
+}
 
 // logged in user post without tags
 async function getOnePostByIdNoTags(postId, userId) {
@@ -71,29 +69,28 @@ async function createPostNoTags(userId, postData) {
 }
 
 // logged in user post WITH tags
-//! temporarily commented out for migration testing
-// async function getOnePostWithAllTags(postId, userId) {
-//   const postWithTags = await Post.findOne({
-//     where: {
-//       id: postId,
-//       userId,
-//     },
-//     include: {
-//       // association: "tags",
-//       model: Tag,
-//       as: "tags",
-//       through: {
-//         attributes: [],
-//       },
-//     },
-//   });
+async function getOnePostWithAllTags(postId, userId) {
+  const postWithTags = await Post.findOne({
+    where: {
+      id: postId,
+      userId,
+    },
+    include: {
+      // association: "tags",
+      model: Tag,
+      as: "tags",
+      through: {
+        attributes: [],
+      },
+    },
+  });
 
-//   if (!postWithTags) {
-//     throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
-//   }
+  if (!postWithTags) {
+    throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
+  }
 
-//   return postWithTags;
-// }
+  return postWithTags;
+}
 
 /**
  * @param {number} userId currently logged in user
@@ -101,26 +98,28 @@ async function createPostNoTags(userId, postData) {
  * @returns {Post}
  */
 async function createPostWithTags(userId, postData) {
+  //1. create transaction to make sure its all pass or nothing
   const transaction = await sequelizeInstance.transaction();
 
   try {
+    // 2.find/create tags (must be at least 1 tag)
     const tagsToAssociate = await tagService.findOrCreateTags(
       postData.tags,
       transaction
     );
 
+    // 3.creating a post
     const newPost = await Post.create(
       { ...postData, userId: userId },
       { transaction: transaction }
     );
-    //6. Associate tags with a post
-    // if tags were fetched or created only then associate them with post
-    if (tagsToAssociate.length > 0) {
-      await newPost.setTags(tagsToAssociate, { transaction: transaction });
-    }
-
+    // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
+    const tagIds = tagsToAssociate.map((tag) => tag.id);
+    // 4. associating posts with tags by their id
+    await newPost.setTags(tagIds, { transaction: transaction });
+    // 5. upon successful creating tags, posts and association -> let all changes pass
     await transaction.commit();
-
+    // 6. slightly formatting response
     return { ...newPost.toJSON(), tags: tagsToAssociate.map((t) => t.name) };
   } catch (err) {
     await transaction.rollback();
@@ -188,9 +187,9 @@ async function deletePostById(postId, userId) {
 
 module.exports = {
   getAllPostsNoTags,
-  //! getAllPostsWithTags,
+  getAllPostsWithTags,
   getOnePostByIdNoTags,
-  //! getOnePostWithAllTags,
+  getOnePostWithAllTags,
   createPostNoTags,
   createPostWithTags,
   updatePostWithTags,

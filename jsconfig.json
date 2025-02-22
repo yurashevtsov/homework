@@ -7,5 +7,5 @@
     }
   },
   "exclude": ["node_modules", "build"],
-  "include": ["**/*.js"]
+  "include": ["**/*.js", "src/database/migrations/20250222135920-post-tags-unique-indexjs"]
 }

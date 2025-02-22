@@ -1,0 +1,14 @@
+"use strict";
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.addIndex("PostTags", ["postId", "tagId"], {
+      unique: true,
+      name: "unique_post_tag",
+    });
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.removeIndex("PostTags", "unique_post_tag");
+  },
+};

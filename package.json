@@ -6,7 +6,9 @@
     "dev": "cross-env NODE_ENV=development node ./src/main.js",
     "test": "jest",
     "migrate:dev": "cross-env NODE_ENV=development npx sequelize-cli db:migrate",
-    "migrate:dev-undo": "cross-env NODE_ENV=development npx sequelize-cli db:migrate:undo:all"
+    "migrate:dev-undo": "cross-env NODE_ENV=development npx sequelize-cli db:migrate:undo",
+    "migrate:test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate",
+    "migrate:test-undo": "cross-env NODE_ENV=test npx sequelize-cli db:migrate:undo"
   },
   "_moduleAliases": {
     "@root": ".",

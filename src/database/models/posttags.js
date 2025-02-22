@@ -22,14 +22,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       postId: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         references: {
           model: "Posts",
           key: "id",
         },
       },
       tagId: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         references: {
           model: "Tags",
           key: "id",
