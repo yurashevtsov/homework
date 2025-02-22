@@ -1,5 +1,5 @@
 // const fs = require("fs");
-const appConfig = require("@src/config/index");
+const appConfig = require("../../config/index.js");
 
 module.exports = {
   development: {

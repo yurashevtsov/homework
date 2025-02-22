@@ -7,13 +7,12 @@ require("module-alias/register");
 const config = require("@src/config");
 const app = require("@src/app.js");
 
-const db = require("@src/database/db.js");
-const defineAssociations = require("@src/associations/index.js");
-defineAssociations();
+const db = require("@src/database/models/sequelize_db");
 
 // when database connected, only then listen for requests
 async function startApp() {
-  await db.initDB();
+  await db.sequelize.authenticate();
+  console.log("Connection to the database has been established successfully.");
 
   app.listen(config.serverPort, () => {
     console.log(`Server is running on port ${config.serverPort}`);

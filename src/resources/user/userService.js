@@ -1,7 +1,7 @@
 "use strict";
 
-// const User = require("@src/resources/user/userModel");
-const { User } = require("@src/associations/models/index.js");
+// const { User } = require("@src/associations/models/index.js");
+const { User } = require("@src/database/models/sequelize_db").sequelize.models;
 const passwordService = require("@src/auth/passwordService.js");
 const jwtService = require("@src/auth/jwtService.js");
 const AppFeatures = require("@src/utils/appFeatures.js");

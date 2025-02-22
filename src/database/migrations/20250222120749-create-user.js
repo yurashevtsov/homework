@@ -4,30 +4,50 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Users", {
       id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
         type: Sequelize.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
       },
-      firstName: {
+      username: {
         type: Sequelize.STRING,
-      },
-      lastName: {
-        type: Sequelize.STRING,
+        unique: "username",
+        allowNull: false,
+        validate: {
+          isAlphanumeric: true,
+        },
       },
       email: {
         type: Sequelize.STRING,
+        unique: "email",
+        allowNull: false,
+        validate: {
+          isEmail: true,
+        },
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      avatar: {
+        type: Sequelize.STRING,
+        defaultValue: "default.png",
+      },
+      changedPasswordAt: {
+        type: Sequelize.DATE,
+        defaultValue: null,
       },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
       },
     });
   },
+  // eslint-disable-next-line no-unused-vars
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("Users");
   },
