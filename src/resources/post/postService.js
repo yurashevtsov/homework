@@ -5,7 +5,7 @@
  */
 const sequelizeInstance =
   require("@src/database/models/sequelize_db").sequelize;
-const { Post, User } = sequelizeInstance.models;
+const { Post, Tag } = sequelizeInstance.models;
 
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 const tagService = require("@src/resources/tag/tagService");

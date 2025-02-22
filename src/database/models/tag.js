@@ -9,11 +9,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Tag.belongsToMany(models.Post, {
+        as: "posts",
+        through: models.PostTags,
+      });
+
+      Tag.hasMany(models.PostTags, { as: "postTags" });
     }
   }
   Tag.init(
     {
-      name: DataTypes.STRING,
+      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+      name: { type: DataTypes.STRING, unique: "name" },
     },
     {
       sequelize,
