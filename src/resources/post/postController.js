@@ -6,7 +6,8 @@ const postService = require("@src/resources/post/postService");
 async function getAllPosts(req, res) {
   res
     .status(200)
-    .send(await postService.getAllPostsWithTags(req.user.id, req.query));
+    // .send(await postService.getAllPostsWithTags(req.user.id, req.query));
+    .send(await postService.getAllPostsNoTags(req.user.id, req.query));
 }
 
 async function getOnePost(req, res) {
@@ -19,7 +20,8 @@ async function getOnePost(req, res) {
 async function createPost(req, res) {
   res
     .status(201)
-    .send(await postService.createPostWithTags(req.user.id, req.body));
+    // .send(await postService.createPostWithTags(req.user.id, req.body));
+    .send(await postService.createPostNoTags(req.user.id, req.body));
 }
 
 // updates a post

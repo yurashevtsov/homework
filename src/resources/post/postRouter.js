@@ -22,7 +22,7 @@ routerInstance.get(
 routerInstance.get("/:id", postController.getOnePost);
 routerInstance.post(
   "/",
-  joiMiddleware.validateSchema(postValidationSchema.postCreateSchema),
+  // joiMiddleware.validateSchema(postValidationSchema.postCreateSchema),
   postController.createPost
 );
 routerInstance.put("/:id",

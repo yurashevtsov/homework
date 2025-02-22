@@ -3,8 +3,9 @@
 /**
  * @type {import('sequelize').Sequelize}
  */
-const sequelize = require("@src/database/models/sequelize_db").sequelize;
-const { Post } = sequelize.models;
+const sequelizeInstance =
+  require("@src/database/models/sequelize_db").sequelize;
+const { Post, User } = sequelizeInstance.models;
 
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 const tagService = require("@src/resources/tag/tagService");
@@ -24,24 +25,25 @@ async function getAllPostsNoTags(userId, queryParams) {
 }
 
 // logged in user's posts WITH tags
-async function getAllPostsWithTags(userId, queryParams) {
-  const initQuery = {
-    where: {
-      userId,
-    },
-    include: {
-      model: Tag,
-      as: "tags",
-      through: {
-        attributes: [],
-      },
-    },
-  };
+//!commented out temporarily for testing migrations
+// async function getAllPostsWithTags(userId, queryParams) {
+//   const initQuery = {
+//     where: {
+//       userId,
+//     },
+//     include: {
+//       model: Tag,
+//       as: "tags",
+//       through: {
+//         attributes: [],
+//       },
+//     },
+//   };
 
-  const { databaseQuery } = new appFeatures(initQuery, queryParams);
+//   const { databaseQuery } = new appFeatures(initQuery, queryParams);
 
-  return await Post.findAll(databaseQuery);
-}
+//   return await Post.findAll(databaseQuery);
+// }
 
 // logged in user post without tags
 async function getOnePostByIdNoTags(postId, userId) {
@@ -59,29 +61,39 @@ async function getOnePostByIdNoTags(postId, userId) {
   return post;
 }
 
-// logged in user post WITH tags
-async function getOnePostWithAllTags(postId, userId) {
-  const postWithTags = await Post.findOne({
-    where: {
-      id: postId,
-      userId,
-    },
-    include: {
-      // association: "tags",
-      model: Tag,
-      as: "tags",
-      through: {
-        attributes: [],
-      },
-    },
+async function createPostNoTags(userId, postData) {
+  const newPost = await Post.create({
+    ...postData,
+    userId,
   });
 
-  if (!postWithTags) {
-    throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
-  }
-
-  return postWithTags;
+  return newPost;
 }
+
+// logged in user post WITH tags
+//! temporarily commented out for migration testing
+// async function getOnePostWithAllTags(postId, userId) {
+//   const postWithTags = await Post.findOne({
+//     where: {
+//       id: postId,
+//       userId,
+//     },
+//     include: {
+//       // association: "tags",
+//       model: Tag,
+//       as: "tags",
+//       through: {
+//         attributes: [],
+//       },
+//     },
+//   });
+
+//   if (!postWithTags) {
+//     throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
+//   }
+
+//   return postWithTags;
+// }
 
 /**
  * @param {number} userId currently logged in user
@@ -176,9 +188,10 @@ async function deletePostById(postId, userId) {
 
 module.exports = {
   getAllPostsNoTags,
-  getAllPostsWithTags,
+  //! getAllPostsWithTags,
   getOnePostByIdNoTags,
-  getOnePostWithAllTags,
+  //! getOnePostWithAllTags,
+  createPostNoTags,
   createPostWithTags,
   updatePostWithTags,
   deletePostById,
