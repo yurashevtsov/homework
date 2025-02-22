@@ -9,19 +9,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      postId: {
-        type: Sequelize.NUMBER,
-        references: {
-          model: "Posts",
-          key: "id",
-        },
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
-      tagId: {
-        type: Sequelize.NUMBER,
-        references: {
-          model: "Tags",
-          key: "id",
-        },
+      content: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
