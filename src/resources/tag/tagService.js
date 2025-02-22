@@ -60,29 +60,22 @@ async function deleteTagById(id) {
 /**
  * Find or creates tags
  * @param {string[]} tagNamesArr an array of tag names ["meme", "sports" "politics"]
- * @returns {object}  object containing all tags
+ * @returns {number[]}  array containing tags of created/found id
  */
 async function findOrCreateTags(tagNamesArr, transaction) {
-  if (typeof tagNamesArr === "string") {
-    tagNamesArr = tagNamesArr.split(",").map((t) => t.trim());
-  }
-
-  tagNamesArr = [...new Set(tagNamesArr)]; // in case of dublicates
-
   // Getting existing tags
   const fetchedTags = await Tag.findAll({
     where: {
       name: { [Op.in]: tagNamesArr },
     },
   });
-
-  const existingTagNamesSet = new Set(
-    fetchedTags.map((tag) => tag.name.trim())
-  );
+  // an array with existing tag names
+  const existingTagNames = fetchedTags.map((tag) => tag.name.trim());
+  // creates an array of objects with tag names that should be created
   const tagsToCreate = tagNamesArr
-    .filter((tagName) => !existingTagNamesSet.has(tagName))
+    .filter((tagName) => !existingTagNames.includes(tagName))
     .map((tagName) => ({ name: tagName }));
-
+  // if tagsToCreate is empty, all tags were already found
   if (tagsToCreate.length > 0) {
     const createdTags = await Tag.bulkCreate(tagsToCreate, {
       validate: true,
@@ -91,7 +84,7 @@ async function findOrCreateTags(tagNamesArr, transaction) {
     return [...fetchedTags, ...createdTags];
   }
 
-  return fetchedTags; // Если все теги уже существуют
+  return fetchedTags; // if tags already exists
 }
 
 module.exports = {

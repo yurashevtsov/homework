@@ -105,22 +105,25 @@ async function createPostWithTags(userId, postData) {
     // 2.find/create tags (must be at least 1 tag)
     const tagsToAssociate = await tagService.findOrCreateTags(
       postData.tags,
-      transaction
+      // transaction
     );
+    // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
+    const tagIds = tagsToAssociate.map((tag) => tag.id);
 
     // 3.creating a post
     const newPost = await Post.create(
       { ...postData, userId: userId },
       { transaction: transaction }
     );
-    // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
-    const tagIds = tagsToAssociate.map((tag) => tag.id);
     // 4. associating posts with tags by their id
     await newPost.setTags(tagIds, { transaction: transaction });
     // 5. upon successful creating tags, posts and association -> let all changes pass
     await transaction.commit();
     // 6. slightly formatting response
-    return { ...newPost.toJSON(), tags: tagsToAssociate.map((t) => t.name) };
+    return {
+      ...newPost.toJSON(),
+      tags: tagsToAssociate.map((t) => t.toJSON()),
+    };
   } catch (err) {
     await transaction.rollback();
     throw err;
@@ -155,8 +158,9 @@ async function updatePostWithTags(postId, userId, postData) {
     await postToUpdate.save();
     // looking for tags
     const tags = await tagService.findOrCreateTags(postData.tags, transaction);
+    const tagIds = tags.map((tag) => tag.id);
     // creating association
-    await postToUpdate.setTags(tags, { transaction });
+    await postToUpdate.setTags(tagIds, { transaction });
     // commiting transaction
     await transaction.commit();
 

@@ -27,14 +27,6 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
-      createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
     });
   },
   // eslint-disable-next-line no-unused-vars

@@ -14,8 +14,9 @@ module.exports = {
   validateSchema(schema, field = "body") {
     return async function (req, res, next) {
       try {
-        await schema.validateAsync(req[field]);
-
+        const result = await schema.validateAsync(req[field]);
+        
+        req.body = result;
         //   if joi didnt throw an error it will call next as usual
         next();
       } catch (err) {
@@ -28,7 +29,7 @@ module.exports = {
     return function (req, res, next) {
       try {
         req.query = Joi.attempt(req.query, schema);
-        
+
         next();
       } catch (err) {
         next(err);
