@@ -130,7 +130,6 @@ async function createPostWithTags(userId, postData) {
   }
 }
 
-// TODO: create update handler
 async function updatePostWithTags(postId, userId, postData) {
   const postToUpdate = await Post.findOne({
     where: {
