@@ -1,6 +1,11 @@
 "use strict";
 
-const { Tag } = require("@src/associations/models/index.js");
+/**
+ * @type {import('sequelize').Sequelize}
+ */
+const sequelizeInstance =
+  require("@src/database/models/sequelize_db").sequelize;
+const { Tag } = sequelizeInstance.models;
 const { Op } = require("sequelize");
 const { HttpNotFoundError } = require("@src/utils/httpErrors");
 

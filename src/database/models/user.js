@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       username: {
         type: DataTypes.STRING,
-        unique: "username",
+        unique: true,
         allowNull: false,
         validate: {
           isAlphanumeric: true,
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: {
         type: DataTypes.STRING,
-        unique: "email",
+        unique: true,
         allowNull: false,
         validate: {
           isEmail: true,

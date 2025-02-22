@@ -15,8 +15,8 @@ module.exports = {
     return async function (req, res, next) {
       try {
         const result = await schema.validateAsync(req[field]);
-        
-        req.body = result;
+
+        req[field] = result;
         //   if joi didnt throw an error it will call next as usual
         next();
       } catch (err) {

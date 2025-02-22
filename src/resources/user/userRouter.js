@@ -23,11 +23,6 @@ routerInstance.post(
 // AUTHORIZATION MIDDLEWARE
 routerInstance.use(authMiddleware.tokenAuthHandler);
 
-routerInstance.param(
-  "id",
-  joiMiddleware.validateSchema(userValidationSchema.validateIdSchema, "params")
-);
-
 // GET ALL USERS
 routerInstance.get(
   "/",

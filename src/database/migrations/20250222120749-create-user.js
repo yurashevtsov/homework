@@ -11,7 +11,7 @@ module.exports = {
       },
       username: {
         type: Sequelize.STRING,
-        unique: "username",
+        unique: true,
         allowNull: false,
         validate: {
           isAlphanumeric: true,
@@ -19,7 +19,7 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        unique: "email",
+        unique: true,
         allowNull: false,
         validate: {
           isEmail: true,
