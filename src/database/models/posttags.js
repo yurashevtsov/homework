@@ -41,6 +41,12 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "PostTags",
       tableName: "post_tags",
       timestamps: false,
+      indexes: [
+        {
+          unique: true,
+          fields: ["postId", "tagId"],
+        },
+      ],
     }
   );
   return PostTags;
