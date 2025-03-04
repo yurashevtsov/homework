@@ -26,7 +26,7 @@ routerInstance.use(authMiddleware.tokenAuthHandler);
 // GET ALL USERS
 routerInstance.get(
   "/",
-  joiMiddleware.validateMutateQuery(userValidationSchema.querySchema),
+  joiMiddleware.validateSchema(userValidationSchema.querySchema, "query"),
   userController.getAllUsers
 );
 

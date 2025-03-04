@@ -14,9 +14,7 @@ module.exports = {
   validateSchema(schema, field = "body") {
     return async function (req, res, next) {
       try {
-        const result = await schema.validateAsync(req[field]);
-
-        req[field] = result;
+        req[field] = await schema.validateAsync(req[field]);
         //   if joi didnt throw an error it will call next as usual
         next();
       } catch (err) {
@@ -24,16 +22,16 @@ module.exports = {
       }
     };
   },
-
-  validateMutateQuery(schema) {
-    return function (req, res, next) {
-      try {
-        req.query = Joi.attempt(req.query, schema);
-
-        next();
-      } catch (err) {
-        next(err);
-      }
-    };
-  },
 };
+
+// validateMutateQuery(schema) {
+//   return function (req, res, next) {
+//     try {
+//       req.query = Joi.attempt(req.query, schema);
+
+//       next();
+//     } catch (err) {
+//       next(err);
+//     }
+//   };
+// },

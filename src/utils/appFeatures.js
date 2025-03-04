@@ -1,5 +1,7 @@
 "use strict";
 
+const helpers = require("./helpers");
+
 class AppFeatures {
   constructor(databaseQuery, queryParams) {
     this.databaseQuery = databaseQuery;
@@ -10,32 +12,30 @@ class AppFeatures {
     this.limitFields();
   }
 
-  //   could accept array/string of acceptable fields and filter by them, so this class could be used by other tables
-  //   could accept array/string of acceptable fields and filter by them, so this class could be used by other tables
   sort() {
     if (this.queryParams?.order) {
-      this.databaseQuery.order = this.queryParams.order.map((sortStr) =>
-        sortStr.split("_")
-      );
+      const orderArr = helpers.convertStringToArray(this.queryParams.order);
+
+      this.databaseQuery.order = orderArr.map((sortStr) => sortStr.split("_"));
     }
 
     return this;
   }
 
-  //   could pass an argument to overwrite limit for findOne cases
   paginate() {
-    this.databaseQuery.page = this.queryParams.page;
-    this.databaseQuery.limit = this.queryParams.limit;
+    this.databaseQuery.page = this.queryParams.page ?? 1;
+    this.databaseQuery.limit = this.queryParams.limit ?? 100;
     this.databaseQuery.offset =
-      (this.queryParams.page - 1) * this.queryParams.limit;
+      (this.databaseQuery.page - 1) * this.databaseQuery.limit;
 
     return this;
   }
 
-  // if I get unknown field, it will throw an error, what if I'll use filter to get only known fields before putting it there?
   limitFields() {
     if (this.queryParams?.fields) {
-      this.databaseQuery.attributes = this.queryParams.fields;
+      const fieldsArr = helpers.convertStringToArray(this.queryParams.fields);
+
+      this.databaseQuery.attributes = fieldsArr;
     }
     return this;
   }

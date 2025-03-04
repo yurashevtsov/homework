@@ -11,7 +11,7 @@ routerInstance.use(authMiddleware.tokenAuthHandler); // middleware to validate t
 
 routerInstance.get(
   "/",
-  joiMiddleware.validateMutateQuery(userValidationSchema.querySchema),
+  joiMiddleware.validateSchema(userValidationSchema.querySchema, "query"),
   postController.getAllPosts
 );
 
