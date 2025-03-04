@@ -112,5 +112,10 @@ describe(".AppFeatures", () => {
 
       expect(databaseQuery.attributes).toEqual(expectedAttributes);
     });
+
+    test("shouldnt create attributes property if fields arent present", () => {
+      const { databaseQuery } = new AppFeatures(dbQuery, qParams);
+      expect(databaseQuery.attributes).toBeUndefined();
+    });
   });
 });
