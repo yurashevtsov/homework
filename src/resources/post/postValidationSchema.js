@@ -13,7 +13,7 @@ const postCreateSchema = Joi.object({
   tags: Joi.alternatives()
     .try(
       Joi.array().items(Joi.string()),
-      Joi.string().custom(helpers.convertStringToArrayForJoi)
+      Joi.string().custom(helpers.convertStringToArray)
     )
     .required(), // at least 1 tag
 });
