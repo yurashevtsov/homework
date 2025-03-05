@@ -67,7 +67,7 @@ describe(".AppFeatures", () => {
 
     test("default limit is set to 100", () => {
       const { databaseQuery } = new AppFeatures(dbQuery, qParams);
-      expect(databaseQuery.limit).toEqual(100);
+      expect(databaseQuery.limit).toEqual(defaultLimit);
     });
 
     test("correctly sets 'offset' property", () => {

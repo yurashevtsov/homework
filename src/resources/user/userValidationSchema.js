@@ -2,7 +2,9 @@
 
 const Joi = require("joi");
 
-// const helpers = require("@src/utils/helpers"); // if i'm planning to use previously defined schema
+const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
+// /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}|:;'",.<>?`~\-]).{8,30}$/; more secure but I dont need it
+const passwordRegex = /^[A-Za-z0-9!@#$%^&*()_+={}|:;'",.<>?`~\-]{3,30}$/; 
 
 const querySchema = Joi.object({
   order: Joi.string()
@@ -19,24 +21,27 @@ const validateIdSchema = Joi.object({
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
+  password: Joi.string().pattern(passwordRegex).required(),
 });
 
-// with("field1", "field2") Requires the presence of other keys whenever the specified key is present.
-const createUserSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
+const baseUserSchema = Joi.object({
+  username: Joi.string().pattern(usernameRegex),
+  password: Joi.string().pattern(passwordRegex),
   repeatPassword: Joi.ref("password"),
   avatar: Joi.string().optional(),
-}).with("password", "repeatPassword");
+});
 
-const updateUserSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(30).optional(),
-  avatar: Joi.string().optional(),
-  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).optional(),
-  repeatPassword: Joi.ref("password"),
-}).with("password", "repeatPassword");
+const createUserSchema = baseUserSchema
+  .fork(["username", "password"], (field) => field.required())
+  .keys({
+    email: Joi.string().email().required(),
+  })
+  .with("password", "repeatPassword");
+
+const updateUserSchema = baseUserSchema
+  .fork(["username", "password"], (field) => field.optional())
+  .keys() // unnecessary but I want to keep it :)
+  .with("password", "repeatPassword");
 
 module.exports = {
   querySchema,
@@ -46,14 +51,12 @@ module.exports = {
   updateUserSchema,
 };
 
-// const querySchema = Joi.object({
-//   // lets just keep it simple - only allowing strings and convert them to an array of strings - for sequelize ->  attributes:["field1", "field2"]
-//   fields: Joi.string().custom(helpers.convertStringToArray).optional(),
-//   page: Joi.number().default(1),
-//   limit: Joi.number().min(1).max(1000).default(100),
-//   // sortDirection: Joi.string().default("asc"), why I commented it out? I want to provide sort direction in order by an underscore, if its not specified, SQLIZE will do ASC, otherwise _desc should be specified by user
-//   order: Joi.alternatives().try(
-//     Joi.array().items(Joi.string()),
-//     Joi.string().custom(helpers.convertStringToArray)
-//   ),
-// });
+/* 
+  Notes for myself just in case
+
+  Joi.object({}).with("field1", "field2") Requires the presence of other keys whenever the specified key is present.
+
+  for editing existing fields -> fork()
+
+  for adding additional rules -> keys({field.string()})
+*/

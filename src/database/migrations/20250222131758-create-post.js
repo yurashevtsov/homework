@@ -16,6 +16,7 @@ module.exports = {
           model: "Users",
           key: "id",
         },
+        onDelete: "CASCADE", // to allow posts being deleted if user was deleted
       },
       title: {
         type: Sequelize.STRING,
