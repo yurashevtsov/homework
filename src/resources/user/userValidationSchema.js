@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const usernameRegex = /^[a-zA-Z0-9_-]{3,30}$/;
 // /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}|:;'",.<>?`~\-]).{8,30}$/; more secure but I dont need it
-const passwordRegex = /^[A-Za-z0-9!@#$%^&*()_+={}|:;'",.<>?`~\-]{3,30}$/; 
+const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+={}:;"'<>,.?~`-]{3,20}$/;
 
 const querySchema = Joi.object({
   order: Joi.string()
@@ -25,22 +25,39 @@ const loginSchema = Joi.object({
 });
 
 const baseUserSchema = Joi.object({
-  username: Joi.string().pattern(usernameRegex),
-  password: Joi.string().pattern(passwordRegex),
-  repeatPassword: Joi.ref("password"),
+  username: Joi.string().pattern(usernameRegex).messages({
+    "string.base": "Username must be a string",
+    "string.empty": "Username cannot be empty",
+    "string.pattern.base":
+      "Input contains forbidden characters or does not meet the length requirement",
+    "string.min": "Username must be at least 3 characters long",
+    "string.max": "Username must be at most 20 characters long",
+  }),
+  password: Joi.string().pattern(passwordRegex).messages({
+    "string.base": "Password must be a string",
+    "string.empty": "Password cannot be empty",
+    "string.pattern.base":
+      "Password contains forbidden characters or does not meet the length requirement",
+  }),
+  repeatPassword: Joi.string().valid(Joi.ref("password")).messages({
+    "any.only": "Passwords do not match",
+  }),
   avatar: Joi.string().optional(),
 });
 
 const createUserSchema = baseUserSchema
-  .fork(["username", "password"], (field) => field.required())
+  .fork(["username", "password", "repeatPassword"], (field) => field.required())
   .keys({
-    email: Joi.string().email().required(),
+    email: Joi.string().email().required().messages({
+      "string.base": "Email must be a string",
+      "string.empty": "Email cannot be empty",
+      "string.email": "Email must be a valid email address",
+    }),
   })
   .with("password", "repeatPassword");
 
 const updateUserSchema = baseUserSchema
-  .fork(["username", "password"], (field) => field.optional())
-  .keys() // unnecessary but I want to keep it :)
+  .fork(["username"], (field) => field.optional())
   .with("password", "repeatPassword");
 
 module.exports = {
@@ -59,4 +76,20 @@ module.exports = {
   for editing existing fields -> fork()
 
   for adding additional rules -> keys({field.string()})
+
+  // stupid update validator xD
+  // .custom((value, helpers) => {
+  //   // check if password exists
+  //   if (value.password) {
+  //     if (!value.repeatPassword) {
+  //       return helpers.error("repeatPassword is missing");
+  //     }
+  //     // mismatch
+  //     if (value.repeatPassword !== value.password) {
+  //       return helpers.error("repeatPassword is not equal to password");
+  //     }
+  //   }
+
+  //   return value; // if password exists and its equal to repeatPassword
+  // })
 */
