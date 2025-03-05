@@ -7,5 +7,5 @@
     }
   },
   "exclude": ["node_modules", "build"],
-  "include": ["**/*.js", "src/database/migrations/20250222135920-post-tags-unique-indexjs"]
+  "include": ["**/*.js", "src/database/migrations/20250222135920-post-tags-unique-indexjs", "src/__tests__/usersEndpoints/usersReqAuth.int.test.js", "src/resources/user/user.int.test.js"]
 }
