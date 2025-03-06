@@ -37,7 +37,7 @@ async function updateTagById(id, tagData) {
   });
 
   if (!foundTag) {
-    throw new HttpNotFoundError(`Tag with that id is not found.`);
+    throw new HttpNotFoundError(`Tag with that id is not found`);
   }
 
   // planning only to update name but w/e
@@ -54,7 +54,7 @@ async function deleteTagById(id) {
   });
 
   if (!tagToDelete) {
-    throw new HttpNotFoundError(`Tag with that id is not found.`);
+    throw new HttpNotFoundError(`Tag with that id is not found`);
   }
 
   await tagToDelete.destroy();

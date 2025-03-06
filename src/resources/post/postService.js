@@ -53,7 +53,7 @@ async function getOnePostByIdNoTags(postId, userId) {
   });
 
   if (!post) {
-    throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
+    throw new HttpNotFoundError(`Post with id ${postId} is not found`);
   }
 
   return post;
@@ -86,7 +86,7 @@ async function getOnePostWithAllTags(postId, userId) {
   });
 
   if (!postWithTags) {
-    throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
+    throw new HttpNotFoundError(`Post with id ${postId} is not found`);
   }
 
   return postWithTags;
@@ -145,7 +145,7 @@ async function updatePostWithTags(postId, userId, postData) {
   });
 
   if (!postToUpdate) {
-    throw new HttpNotFoundError(`Post with id ${postId} is not found.`);
+    throw new HttpNotFoundError(`Post with id ${postId} is not found`);
   }
 
   // start transaction only if post exists
@@ -180,7 +180,7 @@ async function deletePostById(postId, userId) {
   });
 
   if (!postToDelete) {
-    throw new HttpNotFoundError(`Post with that id ${postId} is not found.`);
+    throw new HttpNotFoundError(`Post with that id ${postId} is not found`);
   }
 
   await postToDelete.destroy();

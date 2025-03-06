@@ -6,7 +6,7 @@
     "dev": "cross-env NODE_ENV=development node ./src/main.js",
     "testenv": "cross-env NODE_ENV=test node ./src/main.js",
     "test:unit": "cross-env NODE_ENV=test jest \\.unit\\.",
-    "test:int": "cross-env NODE_ENV=test jest \\.int\\.",
+    "test:int": "cross-env NODE_ENV=test jest \\.int\\. --runInBand --verbose",
     "migrate:dev": "cross-env NODE_ENV=development npx sequelize-cli db:migrate",
     "migrate:dev-undo": "cross-env NODE_ENV=development npx sequelize-cli db:migrate:undo:all",
     "migrate:test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate",

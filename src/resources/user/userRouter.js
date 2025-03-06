@@ -33,7 +33,7 @@ routerInstance.get(
 // GET ONE USER
 routerInstance.get("/:id", userController.getOneUser);
 
-// CREATE USER
+// CREATE USER (Keep it for "admin" purposes...?)
 routerInstance.post(
   "/",
   joiMiddleware.validateSchema(userValidationSchema.createUserSchema),

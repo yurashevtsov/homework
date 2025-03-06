@@ -21,7 +21,7 @@ async function authenticateUser(email, candidatePassword) {
   const foundUser = await getUserByEmailWithPassword(email);
 
   if (!foundUser) {
-    throw new HttpBadRequestError("Invalid credentials.");
+    throw new HttpBadRequestError("Invalid credentials");
   }
 
   // 2.make sure passwords matches the password from database
@@ -69,7 +69,7 @@ async function getUserById(id) {
   });
 
   if (!user) {
-    throw new HttpNotFoundError(`User is not found.`);
+    throw new HttpNotFoundError(`User is not found`);
   }
 
   return user;
@@ -109,7 +109,7 @@ async function updateUser(userId, userData) {
   });
 
   if (!foundUser) {
-    throw new HttpNotFoundError(`User is not found.`);
+    throw new HttpNotFoundError(`User is not found`);
   }
 
   foundUser.set(userData);

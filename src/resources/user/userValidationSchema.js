@@ -21,21 +21,18 @@ const validateIdSchema = Joi.object({
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().pattern(passwordRegex).required(),
+  password: Joi.string().pattern(passwordRegex).required().messages({
+    "string.pattern.base":
+      "Password contains forbidden characters or does not meet the length requirement",
+  }),
 });
 
 const baseUserSchema = Joi.object({
   username: Joi.string().pattern(usernameRegex).messages({
-    "string.base": "Username must be a string",
-    "string.empty": "Username cannot be empty",
     "string.pattern.base":
-      "Input contains forbidden characters or does not meet the length requirement",
-    "string.min": "Username must be at least 3 characters long",
-    "string.max": "Username must be at most 20 characters long",
+      "Username contains forbidden characters or does not meet the length requirement",
   }),
   password: Joi.string().pattern(passwordRegex).messages({
-    "string.base": "Password must be a string",
-    "string.empty": "Password cannot be empty",
     "string.pattern.base":
       "Password contains forbidden characters or does not meet the length requirement",
   }),
@@ -45,14 +42,12 @@ const baseUserSchema = Joi.object({
   avatar: Joi.string().optional(),
 });
 
+// keys({}) - adds new fields to validate
+// fork() - changes existing fields
 const createUserSchema = baseUserSchema
   .fork(["username", "password", "repeatPassword"], (field) => field.required())
   .keys({
-    email: Joi.string().email().required().messages({
-      "string.base": "Email must be a string",
-      "string.empty": "Email cannot be empty",
-      "string.email": "Email must be a valid email address",
-    }),
+    email: Joi.string().email().required(),
   })
   .with("password", "repeatPassword");
 
