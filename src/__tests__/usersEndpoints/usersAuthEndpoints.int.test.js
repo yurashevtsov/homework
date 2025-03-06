@@ -194,14 +194,37 @@ describe("Endpoints that REQUIRE authorization", () => {
   });
 
   // ! add CREATE USER tests
-  
-  //! finish this 
+
   describe("DELETE /api/homework/users/:id", () => {
-    test("should correctly delete a user", async () => {
-      // uncomment to see error message just in case
-      //console.log(updateResponse.text);
+    // CLEARING DB (not pre-defined user) after each test
+    afterEach(async () => {
+      await partialUserTableClear(auhtorizedUser.id);
     });
 
-    test("should return 404 if non-existing user", async () => {});
+    test("should correctly delete a user", async () => {
+      // creating user
+      const userToDelete = await db.sequelize.models.User.create({
+        username: "deleteMe",
+        email: "deletethis@mail.com",
+        password: "pass1234",
+      });
+      // deleting user
+      const responseToDelete = await request(app)
+        .delete(`${USERS_ENDPOINT}${userToDelete.id}`)
+        .set("Authorization", `Bearer ${authToken}`);
+      // dont expect any errors
+      expect(responseToDelete.status).toBe(204);
+    });
+
+    test("should return 404 if non-existing user", async () => {
+      const responseToDelete = await request(app)
+        .delete(`${USERS_ENDPOINT}99999999999999`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      // uncomment to see error message
+      // console.log(responseToDelete.text);
+      expect(responseToDelete.status).toBe(404);
+      expect(responseToDelete.text).toContain("User is not found");
+    });
   });
 });
