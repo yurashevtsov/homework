@@ -193,8 +193,6 @@ describe("Endpoints that REQUIRE authorization", () => {
     });
   });
 
-  // ! add CREATE USER tests
-
   describe("DELETE /api/homework/users/:id", () => {
     // CLEARING DB (not pre-defined user) after each test
     afterEach(async () => {
@@ -225,6 +223,55 @@ describe("Endpoints that REQUIRE authorization", () => {
       // console.log(responseToDelete.text);
       expect(responseToDelete.status).toBe(404);
       expect(responseToDelete.text).toContain("User is not found");
+    });
+  });
+
+  describe("POST /api/homework/users", () => {
+    // this just creates user, no token
+    // CLEARING DB (not pre-defined user) after each test
+    afterEach(async () => {
+      await partialUserTableClear(auhtorizedUser.id);
+    });
+
+    test("should create a new user with valid input", async () => {
+      const res = await request(app)
+        .post(USERS_ENDPOINT)
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          username: "testuser1234",
+          email: "test1234@example.com",
+          avatar: "somefancyavatar.png",
+          password: "password1234",
+          repeatPassword: "password1234",
+        });
+
+      // console.log(res.text);
+      expect(res.status).toBe(201);
+      expect(res.body.username).toBeDefined();
+      expect(res.body.email).toBeDefined();
+      expect(res.body.password).not.toBeDefined();
+
+      const user = await findUserById(res.body.id);
+      expect(user.username).toBe("testuser1234");
+      expect(user.email).toBe("test1234@example.com");
+      expect(user.password).not.toBeDefined();
+    });
+
+    test("Should throw an error on missing field", async () => {
+      const res = await request(app)
+        .post(USERS_ENDPOINT)
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          username: "testuser1234",
+          email: "test1234@example.com",
+          avatar: "somefancyavatar.png",
+          //missing field repeatPassword: "password1234",
+          password: "password1234",
+        });
+
+      // console.log(res.text);
+      expect(res.status).toBe(400);
+      expect(res.text).toContain("is required");
     });
   });
 });

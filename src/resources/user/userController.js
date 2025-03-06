@@ -32,9 +32,9 @@ async function getOneUser(req, res) {
 }
 
 async function createUser(req, res) {
-  const userId = req.params.id;
+  const userData = req.body;
 
-  res.status(201).send(await userService.createUser(userId));
+  res.status(201).send(await userService.createUser(userData));
 }
 
 // changing email is not allowed
