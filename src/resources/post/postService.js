@@ -105,7 +105,7 @@ async function createPostWithTags(userId, postData) {
     // 2.find/create tags (must be at least 1 tag)
     const tagsToAssociate = await tagService.findOrCreateTags(
       postData.tags,
-      // transaction
+      transaction
     );
     // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
     const tagIds = tagsToAssociate.map((tag) => tag.id);
