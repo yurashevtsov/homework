@@ -25,16 +25,18 @@ async function createPostsWithTags(data) {
   try {
     // contains array with strings - ["gw1, gw2", "gw3, gw4"]
     const tags = data.map((p) => p.tags);
-    // split it like that and remove whitespace [["tag1", "tag2"], ["tag3", "tag4"]];
+
+    // remove whitespace [ 'gw1,gw5', 'gw2,gw6' ];
     const filteredTags = tags.map((tagSection) =>
       tagSection
         .split(",")
         .map((oneTag) => oneTag.trim())
         .join(",")
     );
-    // each post will have its own tags with the same index
+
+    // each post will have its own tags with the same index - [["gw1", "gw5"], ["gw2", "gw6"]]
     const splitForOrder = filteredTags.map((tag) => tag.split(","));
-    // each tag will become an object with name property
+    // each tag will become an object with name property [[{name: "gw1"}, {name:"gw5"}], [{name:"gw2"},{name:"gw6"}]]
     const tagsObjects = splitForOrder.map((tag) => {
       return tag.map((t) => {
         return {
