@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "tags",
         foreignKey: "postId",
         otherKey: "tagId",
+        onDelete: "CASCADE", // to delete a record from PostTags
       });
 
       Post.hasMany(models.PostTags, { as: "postTags" });
