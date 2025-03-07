@@ -1,7 +1,9 @@
 "use strict";
-
-// const { User } = require("@src/associations/models/index.js");
-const { User } = require("@src/database/models/sequelize_db").sequelize.models;
+/**
+ * @type {import('sequelize').Sequelize}
+ */
+const sequelize = require("@src/database/models/sequelize_db").sequelize;
+const { User } = sequelize.models;
 const passwordService = require("@src/auth/passwordService.js");
 const jwtService = require("@src/auth/jwtService.js");
 const AppFeatures = require("@src/utils/appFeatures.js");
@@ -48,7 +50,7 @@ async function authenticateUser(email, candidatePassword) {
  * @returns {Object} Returns object with 2 properties - user, token
  */
 async function userSignup(userData) {
-  const newUser = await createUser(userData);
+  const newUser = await User.create(userData);
   const token = jwtService.encodeToken(newUser.id);
 
   return {

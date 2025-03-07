@@ -42,8 +42,6 @@ const baseUserSchema = Joi.object({
   avatar: Joi.string().optional(),
 });
 
-// keys({}) - adds new fields to validate
-// fork() - changes existing fields
 const createUserSchema = baseUserSchema
   .fork(["username", "password", "repeatPassword"], (field) => field.required())
   .keys({
