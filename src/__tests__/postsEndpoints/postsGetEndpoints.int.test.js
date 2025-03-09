@@ -85,7 +85,7 @@ describe("Requires authorization", () => {
         .get(POSTS_ENDPOINT)
         .set("Authorization", `Bearer ${authToken}`);
 
-      console.log(res.text);
+      // console.log(res.text);
 
       expect(res.status).toBe(200);
       expect(res.body[0].title).toBe("random1");
