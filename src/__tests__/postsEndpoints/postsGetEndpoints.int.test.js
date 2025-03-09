@@ -10,9 +10,23 @@ const {
 } = require("./testHelpers");
 const { clearUserTable } = require("@src/__tests__/usersEndpoints/testHelpers");
 
+const post1 = {
+  title: "random1",
+  content: "anything",
+  tags: "gw1, gw5",
+};
+
+const post2 = {
+  title: "random2",
+  content: "anything123",
+  tags: "gw2, gw6",
+};
+
 describe("Requires authorization", () => {
   let auhtorizedUser;
   let authToken;
+  // created during "test" of a helper function
+  let postId;
 
   beforeAll(async () => {
     await db.sequelize.authenticate();
@@ -42,23 +56,22 @@ describe("Requires authorization", () => {
       const postsWithTags = await createPostsWithTags([
         {
           userId: auhtorizedUser.id,
-          title: "random1",
-          content: "anything",
-          tags: "gw1, gw5",
+          ...post1,
         },
         {
           userId: auhtorizedUser.id,
-          title: "random2",
-          content: "anything123",
-          tags: "gw2, gw6",
+          ...post2,
         },
       ]);
 
+      // since all tests relies on this function it doesnt matter if i'll use this function in subsequent tests or not
+      postId = postsWithTags[0].id;
+
       // creates post correctly
-      expect(postsWithTags[0].title).toBe("random1");
-      expect(postsWithTags[0].content).toBe("anything");
-      expect(postsWithTags[1].title).toBe("random2");
-      expect(postsWithTags[1].content).toBe("anything123");
+      expect(postsWithTags[0].title).toBe(post1.title);
+      expect(postsWithTags[0].content).toBe(post1.content);
+      expect(postsWithTags[1].title).toBe(post2.title);
+      expect(postsWithTags[1].content).toBe(post2.content);
       // creates tags correctly
       expect(postsWithTags[0].tags[0].name).toBe("gw1");
       expect(postsWithTags[0].tags[1].name).toBe("gw5");
@@ -88,10 +101,10 @@ describe("Requires authorization", () => {
       // console.log(res.text);
 
       expect(res.status).toBe(200);
-      expect(res.body[0].title).toBe("random1");
-      expect(res.body[0].content).toBe("anything");
-      expect(res.body[1].title).toBe("random2");
-      expect(res.body[1].content).toBe("anything123");
+      expect(res.body[0].title).toBe(post1.title);
+      expect(res.body[0].content).toBe(post1.content);
+      expect(res.body[1].title).toBe(post2.title);
+      expect(res.body[1].content).toBe(post2.content);
 
       expect(res.body[0].tags[0].name).toBe("gw1");
       expect(res.body[0].tags[1].name).toBe("gw5");
@@ -99,6 +112,30 @@ describe("Requires authorization", () => {
       expect(res.body[1].tags[1].name).toBe("gw6");
 
       expect(res.body.length).toEqual(2);
+    });
+  });
+
+  describe(`GET ${POSTS_ENDPOINT}/:id`, () => {
+    test("should find post by id", async () => {
+      const res = await request(app)
+        .get(`${POSTS_ENDPOINT}${postId}`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      // console.log(res.text);
+      expect(res.status).toBe(200);
+      expect(res.body.id).toBe(postId);
+      expect(res.body.title).toBe(post1.title);
+      expect(res.body.content).toBe(post1.content);
+      expect(res.body.tags[0].name).toEqual("gw1");
+      expect(res.body.tags[1].name).toEqual("gw5");
+    });
+
+    test("should return 404 if post doesnt exists", async () => {
+      const res = await request(app)
+        .get(`${POSTS_ENDPOINT}999999999999`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      expect(res.status).toBe(404);
     });
   });
 });
