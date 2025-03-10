@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("@src/app");
 const db = require("@src/database/models/sequelize_db");
-const { clearUserTable } = require("./testHelpers");
+const { clearUserTable, findUserById } = require("./testHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const LOGIN_ENDPOINT = "/api/homework/users/login";
@@ -35,13 +35,21 @@ describe("Signup endpoint", () => {
 
   describe(`POST ${SIGNUP_ENDPOINT}`, () => {
     test("should create a new user", async () => {
+      // signing up
       const res = await request(app).post(SIGNUP_ENDPOINT).send(NEW_USER_DATA);
+
+      // making sure user exists in the db
+      const createdUser = await findUserById(res.body.user.id);
 
       expect(res.status).toBe(201);
       expect(res.body.user.username).toEqual(username);
       expect(res.body.user.email).toEqual(email);
       expect(res.body.user).not.toHaveProperty("password");
       expect(res.body).toHaveProperty("token");
+      // making sure that user was created in db
+      expect(createdUser).toHaveProperty("id");
+      expect(createdUser).toHaveProperty("username");
+      expect(createdUser).toHaveProperty("email");
     });
 
     test("Should not create a duplicate", async () => {

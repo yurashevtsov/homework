@@ -50,36 +50,34 @@ describe("Requires authorization", () => {
     await db.sequelize.close();
   });
 
-  describe("Testing helper (it will be used to find posts)", () => {
-    test("testing helper bulkCreatePosts (and keeping result in db)", async () => {
-      // doesnt support creation of same tags, so they should be unique
-      const postsWithTags = await createPostsWithTags([
-        {
-          userId: auhtorizedUser.id,
-          ...post1,
-        },
-        {
-          userId: auhtorizedUser.id,
-          ...post2,
-        },
-      ]);
+  test("testing helper bulkCreatePosts (and keeping result in db)", async () => {
+    // doesnt support creation of same tags, so they should be unique
+    const postsWithTags = await createPostsWithTags([
+      {
+        userId: auhtorizedUser.id,
+        ...post1,
+      },
+      {
+        userId: auhtorizedUser.id,
+        ...post2,
+      },
+    ]);
 
-      // since all tests relies on this function it doesnt matter if i'll use this function in subsequent tests or not
-      postId = postsWithTags[0].id;
+    // since all tests relies on this function it doesnt matter if i'll use this function in subsequent tests or not
+    postId = postsWithTags[0].id;
 
-      // creates post correctly
-      expect(postsWithTags[0].title).toBe(post1.title);
-      expect(postsWithTags[0].content).toBe(post1.content);
-      expect(postsWithTags[1].title).toBe(post2.title);
-      expect(postsWithTags[1].content).toBe(post2.content);
-      // creates tags correctly
-      expect(postsWithTags[0].tags[0].name).toBe("gw1");
-      expect(postsWithTags[0].tags[1].name).toBe("gw5");
-      expect(postsWithTags[1].tags[0].name).toBe("gw2");
-      expect(postsWithTags[1].tags[1].name).toBe("gw6");
-      // 2 posts should be created
-      expect(postsWithTags).toHaveLength(2);
-    });
+    // creates post correctly
+    expect(postsWithTags[0].title).toBe(post1.title);
+    expect(postsWithTags[0].content).toBe(post1.content);
+    expect(postsWithTags[1].title).toBe(post2.title);
+    expect(postsWithTags[1].content).toBe(post2.content);
+    // creates tags correctly
+    expect(postsWithTags[0].tags[0].name).toBe("gw1");
+    expect(postsWithTags[0].tags[1].name).toBe("gw5");
+    expect(postsWithTags[1].tags[0].name).toBe("gw2");
+    expect(postsWithTags[1].tags[1].name).toBe("gw6");
+    // 2 posts should be created
+    expect(postsWithTags).toHaveLength(2);
   });
 
   describe(`GET ${POSTS_ENDPOINT}`, () => {
