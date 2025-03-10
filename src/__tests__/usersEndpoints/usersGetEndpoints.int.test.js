@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("@src/app");
 const db = require("@src/database/models/sequelize_db");
-const { clearUserTable } = require("./testHelpers");
+const { clearUserTable } = require("../testHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";

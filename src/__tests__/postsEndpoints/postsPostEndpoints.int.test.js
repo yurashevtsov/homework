@@ -8,8 +8,8 @@ const {
   clearPostTable,
   clearTagTable,
   createPostsWithTags,
-} = require("./testHelpers");
-const { clearUserTable } = require("@src/__tests__/usersEndpoints/testHelpers");
+  clearUserTable,
+} = require("../testHelpers");
 
 describe("describe", () => {
   beforeAll(async () => {

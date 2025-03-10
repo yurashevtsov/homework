@@ -5,7 +5,7 @@ const {
   clearUserTable,
   partialUserTableClear,
   createUser,
-} = require("./testHelpers");
+} = require("../testHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";
