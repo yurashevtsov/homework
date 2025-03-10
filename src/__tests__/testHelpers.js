@@ -43,6 +43,22 @@ async function findUserById(id) {
   });
 }
 
+async function findPostWithTags(id, userId) {
+  return await Post.findOne({
+    where: {
+      id,
+      userId,
+    },
+    include: {
+      model: Tag,
+      as: "tags",
+      through: {
+        attributes: [],
+      },
+    },
+  });
+}
+
 async function clearPostTable() {
   await Post.destroy({
     where: {},
@@ -130,6 +146,7 @@ module.exports = {
   findUserById,
   createUser,
   createPostsWithTags,
+  findPostWithTags,
 };
 
 // const request = require("supertest");

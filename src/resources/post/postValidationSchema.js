@@ -8,8 +8,8 @@ const validateIdSchema = Joi.object({
 });
 
 const postCreateSchema = Joi.object({
-  title: Joi.string().optional(),
-  content: Joi.string().optional(),
+  title: Joi.string().required(),
+  content: Joi.string().required(),
   tags: Joi.alternatives()
     .try(
       Joi.array().items(Joi.string()),
