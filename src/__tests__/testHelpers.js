@@ -155,16 +155,28 @@ module.exports = {
 
 // // const testHelpers = require("./testHelpers");
 
-// describe("describe", () => {
+// describe(`PUT ${POSTS_ENDPOINT}`, () => {
+//   let auhtorizedUser;
+//   let authToken;
+
 //   beforeAll(async () => {
-//     await db.sequelize.authenticate();
+//     await initDB();
+
+//     const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
+//       username: "postUser",
+//       email: "postuser@mail.com",
+//       password: "pass1234",
+//       repeatPassword: "pass1234",
+//     });
+
+//     auhtorizedUser = signupRes.body.user;
+//     authToken = signupRes.body.token;
 //   });
 
 //   afterAll(async () => {
-//     await db.sequelize.close();
+//     await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
+//     await closeDB();
 //   });
 
-//   describe("description", () => {
-//     test("should test", async () => {});
-//   });
+//   test("should test", async () => {});
 // });

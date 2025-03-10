@@ -23,7 +23,7 @@ const post2 = {
   tags: "gw2, gw6",
 };
 
-describe("Requires authorization", () => {
+describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
   let auhtorizedUser;
   let authToken;
   // created during "test" of a helper function
