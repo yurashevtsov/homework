@@ -25,7 +25,7 @@ routerInstance.post(
 
 routerInstance.put(
   "/:id",
-  joiMiddleware.validateSchema(postValidationSchema.postCreateSchema),
+  joiMiddleware.validateSchema(postValidationSchema.postUpdateSchema),
   postController.updatePost
 );
 

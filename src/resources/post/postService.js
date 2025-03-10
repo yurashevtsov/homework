@@ -136,6 +136,7 @@ async function updatePostWithTags(postId, userId, postData) {
       id: postId,
       userId,
     },
+    // could comment out to NOT show fetched tags if no tags were updated
     include: {
       association: "tags",
       through: {
@@ -153,17 +154,33 @@ async function updatePostWithTags(postId, userId, postData) {
 
   try {
     // updating the post
-    postToUpdate.set({ postData });
-    await postToUpdate.save();
-    // looking for tags
-    const tags = await tagService.findOrCreateTags(postData.tags, transaction);
-    const tagIds = tags.map((tag) => tag.id);
-    // creating association
-    await postToUpdate.setTags(tagIds, { transaction });
-    // commiting transaction
-    await transaction.commit();
+    await postToUpdate.update(postData, {
+      transaction,
+    });
 
-    return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
+    // only if 'tags' property is exists on update request, only then update tags
+    if (postData.tags) {
+      // looking for tags
+      const tags = await tagService.findOrCreateTags(
+        postData.tags,
+        transaction
+      );
+      const tagIds = tags.map((tag) => tag.id);
+      // creating association
+      await postToUpdate.setTags(tagIds, { transaction });
+
+      // commiting transaction if everything went fine until this moment
+      await transaction.commit();
+
+      return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
+    } else {
+      // commiting transaction - no tages were updated
+      await transaction.commit();
+
+      console.log(postToUpdate);
+
+      return { ...postToUpdate.toJSON() };
+    }
   } catch (err) {
     await transaction.rollback(); // in case of an error abort the changes to DB
     throw err;
