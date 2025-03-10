@@ -16,6 +16,7 @@ const {
   clearPostTable,
   clearTagTable,
   clearUserTable,
+  createPostsWithTags
 } = require("../testHelpers");
 
 describe(`PUT ${POSTS_ENDPOINT}`, () => {
@@ -41,7 +42,9 @@ describe(`PUT ${POSTS_ENDPOINT}`, () => {
     await closeDB();
   });
 
-  test("should update post data", async () => {});
+  test("should update post data", async () => {
+    const createRes = await createPostsWithTags([])
+  });
 
   test("should update tags data", async () => {});
 

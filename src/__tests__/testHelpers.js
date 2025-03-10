@@ -76,6 +76,10 @@ function convertStrToArray(inputStr) {
   return inputStr.split(",").map((item) => item.trim());
 }
 
+/**
+ * @param {Object[]} data expects an array [{userId: 1, content: "somecontent", title: "title"}]
+ * @returns {Array} Array with created posts 
+ */
 async function createPostsWithTags(data) {
   if (!Array.isArray(data)) {
     throw new Error("Must be an array");
