@@ -1,10 +1,11 @@
 const request = require("supertest");
 const app = require("@src/app");
-const db = require("@src/database/models/sequelize_db");
 const {
   clearUserTable,
   partialUserTableClear,
   findUserById,
+  initDB,
+  closeDB,
 } = require("../testHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
@@ -28,7 +29,7 @@ describe("Require authorization", () => {
 
   // Connecting to a database
   beforeAll(async () => {
-    await db.sequelize.authenticate();
+    await initDB();
 
     // Create user before testing authorization routes
     const response = await request(app)
@@ -42,7 +43,7 @@ describe("Require authorization", () => {
   afterAll(async () => {
     // Clear Users table and close db
     await clearUserTable();
-    await db.sequelize.close();
+    await closeDB();
   });
 
   describe("POST /api/homework/users", () => {

@@ -1,9 +1,10 @@
 const request = require("supertest");
-const db = require("@src/database/models/sequelize_db");
 const app = require("@src/app");
 const POSTS_ENDPOINT = "/api/homework/posts/";
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const {
+  initDB,
+  closeDB,
   clearPostTable,
   clearTagTable,
   createPostsWithTags,
@@ -29,7 +30,7 @@ describe("Requires authorization", () => {
   let postId;
 
   beforeAll(async () => {
-    await db.sequelize.authenticate();
+    await initDB();
 
     const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
       username: "postUser",
@@ -43,11 +44,8 @@ describe("Requires authorization", () => {
   });
 
   afterAll(async () => {
-    await clearUserTable();
-    await clearPostTable();
-    await clearTagTable();
-
-    await db.sequelize.close();
+    await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
+    await closeDB();
   });
 
   test("testing helper bulkCreatePosts (and keeping result in db)", async () => {
@@ -113,7 +111,7 @@ describe("Requires authorization", () => {
     });
   });
 
-  describe(`GET ${POSTS_ENDPOINT}/:id`, () => {
+  describe(`GET ${POSTS_ENDPOINT}:id`, () => {
     test("should find post by id", async () => {
       const res = await request(app)
         .get(`${POSTS_ENDPOINT}${postId}`)

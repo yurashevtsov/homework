@@ -5,6 +5,8 @@ const app = require("@src/app");
 const POSTS_ENDPOINT = "/api/homework/posts/";
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const {
+  initDB,
+  closeDB,
   clearPostTable,
   clearTagTable,
   createPostsWithTags,
@@ -13,11 +15,11 @@ const {
 
 describe("describe", () => {
   beforeAll(async () => {
-    await db.sequelize.authenticate();
+    await initDB();
   });
 
   afterAll(async () => {
-    await db.sequelize.close();
+    await closeDB();
   });
 
   describe("description", () => {

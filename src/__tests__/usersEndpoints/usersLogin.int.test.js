@@ -1,7 +1,11 @@
 const request = require("supertest");
 const app = require("@src/app");
-const db = require("@src/database/models/sequelize_db");
-const { clearUserTable, createUser } = require("../testHelpers");
+const {
+  clearUserTable,
+  createUser,
+  closeDB,
+  initDB,
+} = require("../testHelpers");
 
 const LOGIN_ENDPOINT = "/api/homework/users/login";
 
@@ -11,13 +15,13 @@ const password = "pass1234";
 
 describe("Login endpoint", () => {
   beforeAll(async () => {
-    await db.sequelize.authenticate();
+    await initDB();
   });
 
   afterAll(async () => {
     // clear Users table
     await clearUserTable();
-    await db.sequelize.close();
+    await closeDB();
   });
 
   beforeEach(async () => {

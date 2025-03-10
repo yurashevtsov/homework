@@ -1,11 +1,18 @@
 const db = require("@src/database/models/sequelize_db");
-const { convertStringToArray } = require("@src/utils/helpers");
 /**
  * @type {import('sequelize').Sequelize}
  */
 const sequelizeInstance = db.sequelize;
 const { User, Post, Tag } = sequelizeInstance.models;
 const { Op } = require("sequelize");
+
+async function initDB() {
+  await db.sequelize.authenticate();
+}
+
+async function closeDB() {
+  await db.sequelize.close();
+}
 
 async function clearUserTable() {
   await User.destroy({
@@ -62,21 +69,6 @@ async function createPostsWithTags(data) {
     // contains array of tags with strings - ["gw1, gw2", "gw3, gw4"]
     const tags = data.map((p) => p.tags);
 
-    // remove whitespace [ ['gw1,gw5'], ['gw2,gw6'] ];
-    // each post will have its own tags with the same index - [["gw1", "gw5"], ["gw2", "gw6"]]
-    const filteredTags = tags.map((tagSection) =>
-      convertStrToArray(tagSection)
-    );
-
-    // each tag will become an object with name property [[{name: "gw1"}, {name:"gw5"}], [{name:"gw2"},{name:"gw6"}]]
-    const tagsObjects = filteredTags.map((tag) => {
-      return tag.map((t) => {
-        return {
-          name: t,
-        };
-      });
-    });
-
     // remove tags from posts
     const posts = data.map((post) => {
       Reflect.deleteProperty(post, "tags");
@@ -84,11 +76,26 @@ async function createPostsWithTags(data) {
       return post;
     });
 
+    // each post will have its own tags with the same index as post - [["gw1", "gw5"], ["gw2", "gw6"]]
+    const filteredTags = tags.map((tagSection) => {
+      const tags = convertStrToArray(tagSection);
+      return [...new Set(tags)]; // removing dublicates if they exists
+    });
+
+    // each tag will become an object with name property [[{name: "gw1"}, {name:"gw5"}], [{name:"gw2"},{name:"gw6"}]]
+    const tagsToCreate = filteredTags.map((tag) => {
+      return tag.map((t) => {
+        return {
+          name: t,
+        };
+      });
+    });
+
     const createdPosts = await Post.bulkCreate(posts);
     // same as splitForOrder but with created tags and associated posts-indexes
     const createdTags = await Promise.all(
-      tagsObjects.map(async (tagObject) => {
-        return await Tag.bulkCreate(tagObject);
+      tagsToCreate.map(async (tag) => {
+        return await Tag.bulkCreate(tag);
       })
     );
 
@@ -97,24 +104,25 @@ async function createPostsWithTags(data) {
       return tagsArr.map((t) => t.id);
     });
 
-    // creating association
+    // creating association and assign to a post its tags
     await Promise.all(
-      createdPosts.map(
-        async (post, postIndex) => await post.setTags(createdTagsIds[postIndex])
-      )
+      createdPosts.map(async (post, postIndex) => {
+        await post.setTags(createdTagsIds[postIndex]);
+        post.tags = createdTags[postIndex];
+        return post;
+      })
     );
 
     // each post will have its own created tags
-    return createdPosts.map((post, i) => {
-      post.tags = createdTags[i];
-      return post;
-    });
+    return createdPosts;
   } catch (err) {
     console.log(err);
   }
 }
 
 module.exports = {
+  initDB,
+  closeDB,
   clearUserTable,
   clearPostTable,
   clearTagTable,
