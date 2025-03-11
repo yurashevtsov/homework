@@ -9,10 +9,13 @@ const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+={}:;"'<>,.?~`-]{3,20}$/;
 const querySchema = Joi.object({
   order: Joi.string()
     .pattern(/^[a-zA-Z0-9]+(_(asc|desc))?$/i)
-    .optional(),
-  page: Joi.number().integer().positive().default(1),
-  limit: Joi.number().integer().positive().max(1000).default(100),
-  fields: Joi.string(),
+    .optional()
+    .messages({
+      "string.pattern.base": `order must be a string, sort direction should be specified after an underscore "id_desc"`,
+    }),
+  page: Joi.number().integer().positive().default(1).optional(),
+  limit: Joi.number().integer().positive().max(1000).default(100).optional(),
+  fields: Joi.string().optional(),
 });
 
 const validateIdSchema = Joi.object({
@@ -51,7 +54,8 @@ const createUserSchema = baseUserSchema
 
 const updateUserSchema = baseUserSchema
   .fork(["username"], (field) => field.optional())
-  .with("password", "repeatPassword");
+  .with("password", "repeatPassword")
+  .or("username", "password", "avatar"); // at least 1 must be present
 
 module.exports = {
   querySchema,

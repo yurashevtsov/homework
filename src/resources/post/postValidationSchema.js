@@ -4,7 +4,7 @@ const Joi = require("joi");
 const helpers = require("@src/utils/helpers");
 
 const validateIdSchema = Joi.object({
-  id: Joi.number().required(),
+  id: Joi.number().positive().required(),
 });
 
 const postCreateSchema = Joi.object({

@@ -31,7 +31,11 @@ routerInstance.get(
 );
 
 // GET ONE USER
-routerInstance.get("/:id", userController.getOneUser);
+routerInstance.get(
+  "/:id",
+  joiMiddleware.validateSchema(userValidationSchema.validateIdSchema, "params"),
+  userController.getOneUser
+);
 
 // CREATE USER (Keep it for "admin" purposes...?)
 routerInstance.post(
@@ -48,6 +52,10 @@ routerInstance.put(
 );
 
 // DELETE USER
-routerInstance.delete("/:id", userController.deleteUser);
+routerInstance.delete(
+  "/:id",
+  joiMiddleware.validateSchema(userValidationSchema.validateIdSchema, "params"),
+  userController.deleteUser
+);
 
 module.exports = routerInstance;
