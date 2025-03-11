@@ -1,4 +1,4 @@
-const Joi = require("joi");
+"use strict";
 
 const {
   querySchema,
@@ -54,6 +54,12 @@ describe("User Validation Schemas", () => {
       await expect(validateIdSchema.validateAsync({})).rejects.toThrowError(
         /"id" is required/
       );
+    });
+
+    test("should throw an error if id is not a number", async () => {
+      await expect(
+        validateIdSchema.validateAsync({ id: "notanumber" })
+      ).rejects.toThrowError('"id" must be a number');
     });
   });
 
