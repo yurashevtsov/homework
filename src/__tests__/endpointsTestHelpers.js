@@ -47,6 +47,10 @@ async function findUserById(id) {
   });
 }
 
+async function createTags(tags) {
+  return await Tag.bulkCreate(tags);
+}
+
 async function findPostWithTags(id, userId) {
   return await Post.findOne({
     where: {
@@ -155,6 +159,7 @@ module.exports = {
   createUser,
   createPostsWithTags,
   findPostWithTags,
+  createTags
 };
 
 // const request = require("supertest");

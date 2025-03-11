@@ -19,7 +19,7 @@ async function getTagById(id) {
   });
 
   if (!foundTag) {
-    throw new HttpNotFoundError("Tag with that id is not found");
+    throw new HttpNotFoundError(`Tag with id ${id} not found`);
   }
 
   return foundTag;
@@ -37,15 +37,12 @@ async function updateTagById(id, tagData) {
   });
 
   if (!foundTag) {
-    throw new HttpNotFoundError(`Tag with that id is not found`);
+    throw new HttpNotFoundError(`Tag with id ${id} not found`);
   }
 
-  // planning only to update name but w/e
   foundTag.set(tagData);
 
-  await foundTag.save();
-
-  return foundTag;
+  return foundTag.save();
 }
 
 async function deleteTagById(id) {
@@ -54,7 +51,7 @@ async function deleteTagById(id) {
   });
 
   if (!tagToDelete) {
-    throw new HttpNotFoundError(`Tag with that id is not found`);
+    throw new HttpNotFoundError(`Tag with id ${id} not found`);
   }
 
   await tagToDelete.destroy();

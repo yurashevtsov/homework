@@ -18,7 +18,7 @@ async function getOneTag(req, res) {
 async function createTag(req, res) {
   const tagData = req.body;
 
-  res.status(200).send(await tagService.createTag(tagData));
+  res.status(201).send(await tagService.createTag(tagData));
 }
 
 async function updateTag(req, res) {
@@ -31,7 +31,7 @@ async function updateTag(req, res) {
 async function deleteTag(req, res) {
   const tagId = req.params.id;
 
-  res.status(200).send(await tagService.deleteTagById(tagId));
+  res.status(204).send(await tagService.deleteTagById(tagId));
 }
 
 module.exports = {
