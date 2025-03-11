@@ -23,7 +23,7 @@ const NEW_USER_DATA = {
   repeatPassword,
 };
 
-describe("Endpoints that REQUIRE authorization", () => {
+describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
   let auhtorizedUser;
   let authToken;
 
@@ -38,6 +38,11 @@ describe("Endpoints that REQUIRE authorization", () => {
 
     auhtorizedUser = response.body.user;
     authToken = response.body.token;
+  });
+
+  // CLEARING DB (not pre-defined user) after each test
+  afterEach(async () => {
+    await partialUserTableClear(auhtorizedUser.id);
   });
 
   afterAll(async () => {
@@ -57,36 +62,29 @@ describe("Endpoints that REQUIRE authorization", () => {
     expect(res.text).toContain("invalid token");
   });
 
-  describe("DELETE /api/homework/users/:id", () => {
-    // CLEARING DB (not pre-defined user) after each test
-    afterEach(async () => {
-      await partialUserTableClear(auhtorizedUser.id);
+  test("should correctly delete a user", async () => {
+    // creating user
+    const userToDelete = await createUser({
+      username: "deleteMe",
+      email: "deletethis@mail.com",
+      password: "pass1234",
     });
+    // deleting user
+    const res = await request(app)
+      .delete(`${USERS_ENDPOINT}${userToDelete.id}`)
+      .set("Authorization", `Bearer ${authToken}`);
+    // dont expect any errors
+    expect(res.status).toBe(204);
+  });
 
-    test("should correctly delete a user", async () => {
-      // creating user
-      const userToDelete = await createUser({
-        username: "deleteMe",
-        email: "deletethis@mail.com",
-        password: "pass1234",
-      });
-      // deleting user
-      const res = await request(app)
-        .delete(`${USERS_ENDPOINT}${userToDelete.id}`)
-        .set("Authorization", `Bearer ${authToken}`);
-      // dont expect any errors
-      expect(res.status).toBe(204);
-    });
+  test("should return 404 if non-existing user", async () => {
+    const res = await request(app)
+      .delete(`${USERS_ENDPOINT}99999999999999`)
+      .set("Authorization", `Bearer ${authToken}`);
 
-    test("should return 404 if non-existing user", async () => {
-      const res = await request(app)
-        .delete(`${USERS_ENDPOINT}99999999999999`)
-        .set("Authorization", `Bearer ${authToken}`);
-
-      // uncomment to see error message
-      // console.log(res.text);
-      expect(res.status).toBe(404);
-      expect(res.text).toContain("User is not found");
-    });
+    // uncomment to see error message
+    // console.log(res.text);
+    expect(res.status).toBe(404);
+    expect(res.text).toContain("User is not found");
   });
 });

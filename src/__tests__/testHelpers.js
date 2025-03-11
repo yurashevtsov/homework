@@ -20,11 +20,15 @@ async function clearUserTable() {
   });
 }
 
-async function partialUserTableClear(value) {
+/**
+ * Accepts any amount of arguments, should be (id) numbers, that would be kept in database and the rest are deleted.
+ * @param  {number} values id numbers
+ */
+async function partialUserTableClear(...values) {
   await User.destroy({
     where: {
       id: {
-        [Op.ne]: value,
+        [Op.notIn]: values,
       },
     },
   });
@@ -78,7 +82,7 @@ function convertStrToArray(inputStr) {
 
 /**
  * @param {Object[]} data expects an array [{userId: 1, content: "somecontent", title: "title"}]
- * @returns {Array} Array with created posts 
+ * @returns {Array} Array with created posts
  */
 async function createPostsWithTags(data) {
   if (!Array.isArray(data)) {
