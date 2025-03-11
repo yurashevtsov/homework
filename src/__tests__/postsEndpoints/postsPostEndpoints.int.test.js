@@ -17,7 +17,7 @@ const {
   clearTagTable,
   clearUserTable,
   findPostWithTags,
-} = require("../testHelpers");
+} = require("../endpointsTestHelpers");
 
 describe(`POST ${POSTS_ENDPOINT}`, () => {
   let auhtorizedUser;

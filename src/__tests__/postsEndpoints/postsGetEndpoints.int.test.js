@@ -9,7 +9,7 @@ const {
   clearTagTable,
   createPostsWithTags,
   clearUserTable,
-} = require("../testHelpers");
+} = require("../endpointsTestHelpers");
 
 const post1 = {
   title: "random1",

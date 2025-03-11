@@ -5,7 +5,7 @@ const {
   createUser,
   closeDB,
   initDB,
-} = require("../testHelpers");
+} = require("../endpointsTestHelpers");
 
 const LOGIN_ENDPOINT = "/api/homework/users/login";
 

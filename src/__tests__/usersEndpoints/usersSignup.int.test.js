@@ -5,7 +5,7 @@ const {
   closeDB,
   clearUserTable,
   findUserById,
-} = require("../testHelpers");
+} = require("../endpointsTestHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const LOGIN_ENDPOINT = "/api/homework/users/login";

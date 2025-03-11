@@ -1,6 +1,6 @@
 const request = require("supertest");
 const app = require("@src/app");
-const { clearUserTable, initDB, closeDB } = require("../testHelpers");
+const { clearUserTable, initDB, closeDB } = require("../endpointsTestHelpers");
 
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";

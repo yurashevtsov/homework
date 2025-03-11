@@ -17,7 +17,7 @@ const {
   clearTagTable,
   clearUserTable,
   findPostWithTags,
-} = require("../testHelpers");
+} = require("../endpointsTestHelpers");
 const req = require("express/lib/request");
 
 describe(`DELETE ${POSTS_ENDPOINT}`, () => {
