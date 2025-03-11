@@ -15,7 +15,11 @@ routerInstance.get(
   postController.getAllPosts
 );
 
-routerInstance.get("/:id", postController.getOnePost);
+routerInstance.get(
+  "/:id",
+  joiMiddleware.validateSchema(postValidationSchema.validateIdSchema, "params"),
+  postController.getOnePost
+);
 
 routerInstance.post(
   "/",
@@ -25,10 +29,15 @@ routerInstance.post(
 
 routerInstance.put(
   "/:id",
+  joiMiddleware.validateSchema(postValidationSchema.validateIdSchema, "params"),
   joiMiddleware.validateSchema(postValidationSchema.postUpdateSchema),
   postController.updatePost
 );
 
-routerInstance.delete("/:id", postController.deletePost);
+routerInstance.delete(
+  "/:id",
+  joiMiddleware.validateSchema(postValidationSchema.validateIdSchema, "params"),
+  postController.deletePost
+);
 
 module.exports = routerInstance;

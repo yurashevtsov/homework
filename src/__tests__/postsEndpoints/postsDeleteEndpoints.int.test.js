@@ -89,7 +89,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
 
   test("Should return 404 if post doesnt exists", async () => {
     const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}9999999999999999999`)
+      .delete(`${POSTS_ENDPOINT}999999999999`)
       .set("Authorization", `Bearer ${authToken}`);
 
     console.log(res.text);

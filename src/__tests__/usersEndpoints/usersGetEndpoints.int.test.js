@@ -76,7 +76,7 @@ describe("Endpoint require authorization", () => {
       expect(res.body.email).toEqual(auhtorizedUser.email);
     });
 
-    test.only("should return 404 if non-existing user", async () => {
+    test("should return 404 if non-existing user", async () => {
       const res = await request(app)
         .get(`${USERS_ENDPOINT}99999999999999`)
         .set("Authorization", `Bearer ${authToken}`);
