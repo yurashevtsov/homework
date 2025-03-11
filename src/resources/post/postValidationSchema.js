@@ -10,11 +10,12 @@ const validateIdSchema = Joi.object({
 const postCreateSchema = Joi.object({
   title: Joi.string().required(),
   content: Joi.string().required(),
-  tags: Joi.alternatives()
-    .try(
-      Joi.array().items(Joi.string()).min(1),
-      Joi.string().custom(helpers.convertStringToArray)
-    )
+  tags: Joi.string()
+    .custom((value, joiHelper) => {
+      const arr = helpers.convertStringToArray(value);
+      // remove dublicates
+      return [...new Set(arr)];
+    })
     .required(), // at least 1 tag
 });
 
