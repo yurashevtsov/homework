@@ -76,14 +76,26 @@ describe("Endpoint require authorization", () => {
       expect(res.body.email).toEqual(auhtorizedUser.email);
     });
 
-    test("should return 404 if non-existing user", async () => {
+    test("should throw an error 404 if non-existing user", async () => {
+      const userId = 999999999999;
       const res = await request(app)
-        .get(`${USERS_ENDPOINT}99999999999999`)
+        .get(`${USERS_ENDPOINT}${userId}`)
         .set("Authorization", `Bearer ${authToken}`);
 
       // console.log(res.text);
       expect(res.status).toBe(404);
       expect(res.text).toContain("User is not found");
+    });
+
+    test("should throw an error on invalid id", async () => {
+      const invalidUserId = "asdf";
+      const res = await request(app)
+        .get(`${USERS_ENDPOINT}${invalidUserId}`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      // console.log(res.text);
+      expect(res.status).toBe(400);
+      expect(res.text).toContain(`"id" must be a number`);
     });
 
     test("Should fail authentication with invalid token", async () => {

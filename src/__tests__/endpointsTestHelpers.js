@@ -21,8 +21,10 @@ async function clearUserTable() {
 }
 
 /**
- * Accepts any amount of arguments, should be (id) numbers, that would be kept in database and the rest are deleted.
- * @param  {number} values id numbers
+ * Deletes users from the database whose IDs are not in the provided values.
+ *
+ * @param {...number} values - The IDs of users to retain in the database.
+ * @returns {Promise<void>} A promise that resolves when the operation is complete.
  */
 async function partialUserTableClear(...values) {
   await User.destroy({
@@ -34,6 +36,16 @@ async function partialUserTableClear(...values) {
   });
 }
 
+/**
+ * Creates a new user in the database.
+ *
+ * @param {Object} userData - The user data to create a new user.
+ * @param {string} userData.username - The username of the user.
+ * @param {string} userData.email - The email address of the user.
+ * @param {string} userData.password - The password for the user.
+ * @param {string} userData.repeatPassword - The password confirmation for the user.
+ * @returns {Promise<User>} A promise that resolves to the created User object.
+ */
 async function createUser(userData) {
   return await User.create(userData);
 }
@@ -47,8 +59,20 @@ async function findUserById(id) {
   });
 }
 
+/**
+ * Creates multiple tags in the database from a comma-separated string.
+ *
+ * @param {string} tags - A comma-separated string of tag names.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of created Tag instances.
+ */
 async function createTags(tags) {
-  return await Tag.bulkCreate(tags);
+  // removes whitespaces and returns an array of objects with name property [ {name:"gw1"}, { name: "gw2" }, {name: "gw3" } ]
+  const tagsArr = tags.split(",").map((tag) => {
+    return {
+      name: tag.trim(),
+    };
+  });
+  return await Tag.bulkCreate(tagsArr);
 }
 
 async function findPostWithTags(id, userId) {
@@ -85,8 +109,10 @@ function convertStrToArray(inputStr) {
 }
 
 /**
- * @param {Object[]} data expects an array [{userId: 1, content: "somecontent", title: "title"}]
- * @returns {Array} Array with created posts
+ * Creates posts based on the provided data.
+ *
+ * @param {Array<Object>} data - An array of objects representing posts to create. 
+ * @returns {Promise<Array>} A promise that resolves to an array of created posts.
  */
 async function createPostsWithTags(data) {
   if (!Array.isArray(data)) {
@@ -159,7 +185,7 @@ module.exports = {
   createUser,
   createPostsWithTags,
   findPostWithTags,
-  createTags
+  createTags,
 };
 
 // const request = require("supertest");
