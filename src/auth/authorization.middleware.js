@@ -39,7 +39,7 @@ async function tokenAuthHandler(req, res, next) {
   const foundUser = await userService.getUserByIdNoError(payload.sub);
 
   if (!foundUser) {
-    return next(new HttpBadRequestError("Invalid token"));
+    return next(new HttpBadRequestError("User doesnt exists Invalid token"));
   }
 
   // 5. make sure user didnt change his password after token was issued

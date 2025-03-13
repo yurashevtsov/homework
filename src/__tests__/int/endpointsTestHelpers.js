@@ -44,7 +44,7 @@ async function partialUserTableClear(...values) {
  * @param {string} userData.email - The email address of the user.
  * @param {string} userData.password - The password for the user.
  * @param {string} userData.repeatPassword - The password confirmation for the user.
- * @returns {Promise<User>} A promise that resolves to the created User object.
+ * @returns {Promise<Object>} A promise that resolves to the created User object.
  */
 async function createUser(userData) {
   return await User.create(userData);
@@ -111,7 +111,7 @@ function convertStrToArray(inputStr) {
 /**
  * Creates posts based on the provided data.
  *
- * @param {Array<Object>} data - An array of objects representing posts to create. 
+ * @param {Array<Object>} data - An array of objects representing posts to create.
  * @returns {Promise<Array>} A promise that resolves to an array of created posts.
  */
 async function createPostsWithTags(data) {
@@ -187,35 +187,3 @@ module.exports = {
   findPostWithTags,
   createTags,
 };
-
-// const request = require("supertest");
-// const db = require("@src/database/models/sequelize_db");
-// const app = require("@src/app");
-
-// // const testHelpers = require("./testHelpers");
-
-// describe(`PUT ${POSTS_ENDPOINT}`, () => {
-//   let auhtorizedUser;
-//   let authToken;
-
-//   beforeAll(async () => {
-//     await initDB();
-
-//     const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-//       username: "postUser",
-//       email: "postuser@mail.com",
-//       password: "pass1234",
-//       repeatPassword: "pass1234",
-//     });
-
-//     auhtorizedUser = signupRes.body.user;
-//     authToken = signupRes.body.token;
-//   });
-
-//   afterAll(async () => {
-//     await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
-//     await closeDB();
-//   });
-
-//   test("should test", async () => {});
-// });

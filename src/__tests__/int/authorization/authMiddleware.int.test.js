@@ -1,59 +1,105 @@
 const request = require("supertest");
 const app = require("@src/app");
 
-const { initDB, closeDB, clearUserTable } = require("../endpointsTestHelpers");
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const {
+  initDB,
+  closeDB,
+  clearUserTable,
+  createUser,
+} = require("../endpointsTestHelpers");
+
 const USERS_ENDPOINT = "/api/homework/users/";
-
-const jwtService = require("@src/auth/jwtService");
-const userService = require("@src/resources/user/userService");
-
-jest.mock("@src/auth/jwtService");
-jest.mock("@src/resources/user/userService");
+const authTestHelper = require("./jwtTestHelper");
 
 describe("Authorization middleware", () => {
   beforeAll(async () => {
     await initDB();
+  });
 
-    // const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-    //   username: "postUser",
-    //   email: "postuser@mail.com",
-    //   password: "pass1234",
-    //   repeatPassword: "pass1234",
-    // });
-
-    // auhtorizedUser = signupRes.body.user;
-    // authToken = signupRes.body.token;
+  afterEach(async () => {
+    await clearUserTable();
   });
 
   afterAll(async () => {
-    jest.clearAllMocks();
     await clearUserTable();
     await closeDB();
   });
 
   test("return 400 if token is not provided", async () => {
-    const getUsersRes = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", ``);
+    const res = await request(app).get(USERS_ENDPOINT).set("Authorization", ``);
 
-    expect(getUsersRes.status).toBe(400);
-    expect(getUsersRes.text).toContain("Invalid token or it doesnt exists");
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("Invalid token or it doesnt exists");
   });
 
   test("should return 400 if token does not have AUTHENTICATION scope", async () => {
-    const mockToken = "mock.jwt.token";
-    const payload = { sub: 10, scope: "MEMES" };
-    jwtService.decodeToken.mockResolvedValue(payload);
+    // create token with wrong scope
+    const wrongScopeToken = authTestHelper.encodeToken(123, "invalidScope");
 
-    const response = await request(app)
+    const res = await request(app)
       .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${mockToken}`);
+      .set("Authorization", `Bearer ${wrongScopeToken}`);
 
-    // console.log(response.text);
-    expect(response.status).toBe(400);
-    expect(response.text).toContain("Invalid token");
+    // console.log(res.text);
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("Invalid token");
   });
 
-  test("should return throw an error if user changed password after JWT was issued", async () => {});
+  test("Shouldnt allow access if owner of JWT was deleted", async () => {
+    const deletedUserId = 10;
+    const deletedUserToken = authTestHelper.encodeToken(
+      deletedUserId,
+      "AUTHENTICATION"
+    );
+
+    const res = await request(app)
+      .get(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${deletedUserToken}`);
+
+    // console.log(res.text);
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("Invalid token");
+  });
+
+  test("Shouldnt throw an error if token has expired", async () => {
+    const expiredToken = authTestHelper.createExpiredToken(
+      10,
+      "AUTHENTICATION"
+    );
+
+    const res = await request(app)
+      .get(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${expiredToken}`);
+
+    // console.log(res.text);
+    expect(res.status).toBe(401);
+    expect(res.text).toContain("jwt expired");
+  });
+
+  test("Should throw an error if user changed password after token was issued", async () => {
+    // create user
+    const createdUser = await createUser({
+      username: "postUser",
+      email: "postuser@mail.com",
+      password: "pass1234",
+      repeatPassword: "pass1234",
+    });
+    const authToken = authTestHelper.createBackdateToken(
+      createdUser.id,
+      "AUTHENTICATION"
+    );
+    // change his password
+    createdUser.set({ password: "pass4321" });
+    await createdUser.save();
+    // trying to access protected route
+    const res = await request(app)
+      .get(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    // console.log(res.text);
+    expect(res.status).toBe(401);
+    expect(res.text).toContain(
+      "User recently changed his password. Please login again"
+    );
+  });
 });
