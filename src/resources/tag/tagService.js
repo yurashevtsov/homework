@@ -65,8 +65,6 @@ async function deleteTagById(id) {
  * @returns {object[]}  array containing tags of created/found id
  */
 async function findOrCreateTags(tagNamesArr, transaction) {
-  // removing dublicates
-  tagNamesArr = [...new Set(tagNamesArr)];
   // Getting existing tags
   const fetchedTags = await Tag.findAll({
     where: {
@@ -74,10 +72,10 @@ async function findOrCreateTags(tagNamesArr, transaction) {
     },
   });
   // an array with existing tag names
-  const existingTagNames = fetchedTags.map((tag) => tag.name.trim());
+  const fetchedTagNames = fetchedTags.map((tag) => tag.name);
   // creates an array of objects with tag names that should be created
   const tagsToCreate = tagNamesArr
-    .filter((tagName) => !existingTagNames.includes(tagName))
+    .filter((tagName) => !fetchedTagNames.includes(tagName))
     .map((tagName) => ({ name: tagName }));
   // if tagsToCreate is empty, all tags were already found
   if (tagsToCreate.length > 0) {

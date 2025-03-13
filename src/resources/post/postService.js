@@ -93,28 +93,34 @@ async function getOnePostWithAllTags(postId, userId) {
 }
 
 /**
- * @param {number} userId currently logged in user
- * @param {string[]} tagsArr array of strings, tags that will be created/fetched from DB
- * @returns {Post}
+ * Creates a new post along with associated tags in a single transaction.
+ *
+ * @function createPostWithTags
+ * @param {number} userId - The ID of the user creating the post.
+ * @param {Object} postData - The data for the post, should include tag information.
+ * @param {Array<string>} tagsData - An array of tag names to associate with the post. Must contain at least one tag.
+ * @returns {Object} The created post object, including associated tags.
  */
-async function createPostWithTags(userId, postData) {
+async function createPostWithTags(userId, postData, tagsData) {
   //1. create transaction to make sure its all pass or nothing
   const transaction = await sequelizeInstance.transaction();
 
   try {
-    // 2.find/create tags (must be at least 1 tag)
-    const tagsToAssociate = await tagService.findOrCreateTags(
-      postData.tags,
-      transaction
-    );
-    // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
-    const tagIds = tagsToAssociate.map((tag) => tag.id);
-
-    // 3.creating a post
+    // 2.creating a post
     const newPost = await Post.create(
       { ...postData, userId: userId },
       { transaction: transaction }
     );
+
+    // 3.find/create tags (must be at least 1 tag)
+    const tagsToAssociate = await tagService.findOrCreateTags(
+      tagsData,
+      transaction
+    );
+
+    // to associate with post -> an array of `id` is required, before I could use array with instances, apparently not anymore
+    const tagIds = tagsToAssociate.map((tag) => tag.id);
+
     // 4. associating posts with tags by their id
     await newPost.setTags(tagIds, { transaction: transaction });
     // 5. upon successful creating tags, posts and association -> let all changes pass
@@ -130,7 +136,17 @@ async function createPostWithTags(userId, postData) {
   }
 }
 
-async function updatePostWithTags(postId, userId, postData) {
+/**
+ * Updates a post's content and associated tags in the database.
+ *
+ * @function updatePostWithTags
+ * @param {number} postId - The ID of the post to be updated.
+ * @param {number} userId - The ID of the user who owns the post.
+ * @param {Object} postData - The data to update the post with.
+ * @param {string[]} [tagsData=[]] - An optional array of tag names to associate with the post.
+ * @returns {Object} The updated post object, including associated tags if any were specified and updated.
+ */
+async function updatePostWithTags(postId, userId, postData, tagsData = []) {
   const postToUpdate = await Post.findOne({
     where: {
       id: postId,
@@ -153,34 +169,28 @@ async function updatePostWithTags(postId, userId, postData) {
   const transaction = await sequelizeInstance.transaction();
 
   try {
+    let foundOrCreatedTags;
     // updating the post
-    await postToUpdate.update(postData, {
-      transaction,
-    });
+    postToUpdate.set(postData);
+    await postToUpdate.save({ transaction });
 
     // only if 'tags' property is exists on update request, only then update tags
-    if (postData.tags) {
+    if (Array.isArray(tagsData) && tagsData.length > 0) {
       // looking for tags
-      const tags = await tagService.findOrCreateTags(
-        postData.tags,
+      foundOrCreatedTags = await tagService.findOrCreateTags(
+        tagsData,
         transaction
       );
-      const tagIds = tags.map((tag) => tag.id);
+      const tagIds = foundOrCreatedTags.map((tag) => tag.id);
       // creating association
       await postToUpdate.setTags(tagIds, { transaction });
-
-      // commiting transaction if everything went fine until this moment
-      await transaction.commit();
-
-      return { ...postToUpdate.toJSON(), tags: tags.map((t) => t.toJSON()) };
-    } else {
-      // commiting transaction - no tages were updated
-      await transaction.commit();
-
-      console.log(postToUpdate);
-
-      return { ...postToUpdate.toJSON() };
     }
+    // commiting transaction
+    await transaction.commit();
+    // if tags were specified, they will be updated/fetched and replace initially fetched ones
+    return tagsData.length > 0
+      ? { ...postToUpdate.toJSON(), tags: foundOrCreatedTags }
+      : postToUpdate.toJSON();
   } catch (err) {
     await transaction.rollback(); // in case of an error abort the changes to DB
     throw err;

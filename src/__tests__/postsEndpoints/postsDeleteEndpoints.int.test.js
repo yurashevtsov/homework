@@ -92,7 +92,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
       .delete(`${POSTS_ENDPOINT}999999999999`)
       .set("Authorization", `Bearer ${authToken}`);
 
-    console.log(res.text);
+    // console.log(res.text);
     expect(res.status).toBe(404);
     expect(res.text).toContain("not found"); // Post with that id 9999999999999999999 is not found
   });

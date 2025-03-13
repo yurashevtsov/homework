@@ -99,7 +99,9 @@ describe(`PUT ${POSTS_ENDPOINT}`, () => {
         tags: tagsToUpdate,
       });
 
-    // `updatedRes.tags` wil look like this  [ { id: 119, name: 'yolo' }, { id: 120, name: 'fun' } ]
+    // console.log(updateRes.text);
+
+    // `updatedRes.body.tags` wil look like this  [ { id: 119, name: 'yolo' }, { id: 120, name: 'fun' } ]
     // making it ["yolo", "fun"];
     const updatedTagNames = updateRes.body.tags.map((tag) => tag.name);
     // returns true if all updated tag names are included in request
@@ -112,14 +114,12 @@ describe(`PUT ${POSTS_ENDPOINT}`, () => {
   });
 
   test("should not update post that doesnt belong to him (404)", async () => {
-    let secondUser;
-    let secondUserAuthToken;
     // create a post with tags by created user (before tests)
     const firstUserPost = await createPostsWithTags([
       { userId: auhtorizedUser.id, ...POST_TO_CREATE },
     ]);
 
-    expect(firstUserPost[0].id).toBeDefined();
+    expect(firstUserPost[0].id).toBeDefined(); // expect post to be created by authorized user
 
     // create a new user
     const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
@@ -129,21 +129,18 @@ describe(`PUT ${POSTS_ENDPOINT}`, () => {
       repeatPassword: "pass1234",
     });
 
-    secondUser = signupRes.body.user;
-    secondUserAuthToken = signupRes.body.token;
     // token should be present
     expect(signupRes.body.token).toBeDefined();
     // use new token to edit post created by first user
     const updateRes = await request(app)
       .put(`${POSTS_ENDPOINT}${firstUserPost[0].id}`)
-      .set("Authorization", `Bearer ${secondUserAuthToken}`)
+      .set("Authorization", `Bearer ${signupRes.body.token}`)
       .send({
         title: "Yoooooooo",
       });
 
     // console.log(updateRes.text);
-    // get 404 error
-    expect(updateRes.status).toBe(404);
+    expect(updateRes.status).toBe(404); // get 404 error
     expect(updateRes.text).toContain(`not found`);
   });
 });

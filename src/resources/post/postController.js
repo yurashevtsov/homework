@@ -18,19 +18,31 @@ async function getOnePost(req, res) {
 
 // creates a new post WITH tags
 async function createPost(req, res) {
+  const { tags } = req.body;
+  const postData = { ...req.body };
+  Reflect.deleteProperty(postData, "tags");
+
   res
     .status(201)
     // .send(await postService.createPostWithTags(req.user.id, req.body));
-    .send(await postService.createPostWithTags(req.user.id, req.body));
+    .send(await postService.createPostWithTags(req.user.id, postData, tags));
 }
 
 // updates a post
-// can update tags by names - passing a string of tags
 async function updatePost(req, res) {
+  const { tags } = req.body;
+  const postData = { ...req.body };
+  Reflect.deleteProperty(postData, "tags");
+
   res
     .status(200)
     .send(
-      await postService.updatePostWithTags(req.params.id, req.user.id, req.body)
+      await postService.updatePostWithTags(
+        req.params.id,
+        req.user.id,
+        postData,
+        tags
+      )
     );
 }
 
