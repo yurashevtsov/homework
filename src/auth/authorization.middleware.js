@@ -24,7 +24,7 @@ async function tokenAuthHandler(req, res, next) {
   }
 
   if (!token) {
-    return next(new HttpBadRequestError("Invalid token or it doesnt exists."));
+    return next(new HttpBadRequestError("Invalid token or it doesnt exists"));
   }
 
   // 2.decode token
@@ -32,14 +32,14 @@ async function tokenAuthHandler(req, res, next) {
 
   // 3. Make sure scope contains - AUTHENTICATION
   if (!payload?.scope.includes("AUTHENTICATION")) {
-    return next(new HttpBadRequestError("Invalid token."));
+    return next(new HttpBadRequestError("Invalid token"));
   }
 
   // 4. Make sure user still exists
   const foundUser = await userService.getUserByIdNoError(payload.sub);
 
   if (!foundUser) {
-    return next(new HttpBadRequestError("Invalid token."));
+    return next(new HttpBadRequestError("Invalid token"));
   }
 
   // 5. make sure user didnt change his password after token was issued
@@ -51,7 +51,7 @@ async function tokenAuthHandler(req, res, next) {
   if (recentlyChangedPassword) {
     return next(
       new HttpUnauthorizedError(
-        "User recently changed his password. Please login again."
+        "User recently changed his password. Please login again"
       )
     );
   }

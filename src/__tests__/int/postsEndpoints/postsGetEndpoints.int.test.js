@@ -126,12 +126,24 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
       expect(res.body.tags[1].name).toEqual("gw5");
     });
 
-    test("should return 404 if post doesnt exists", async () => {
+    test("should throw 404 if post doesnt exists", async () => {
+      const postId = 999999999;
       const res = await request(app)
-        .get(`${POSTS_ENDPOINT}999999999999`)
+        .get(`${POSTS_ENDPOINT}${postId}`)
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(res.status).toBe(404);
+      expect(res.text).toContain("not found");
+    });
+
+    test("should throw an error", async () => {
+      const invalidId = "asdf";
+      const res = await request(app)
+        .get(`${POSTS_ENDPOINT}${invalidId}`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      expect(res.status).toBe(400);
+      expect(res.text).toContain(`"id" must be a number`);
     });
   });
 });

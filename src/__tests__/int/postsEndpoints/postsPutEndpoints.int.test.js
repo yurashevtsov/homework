@@ -19,7 +19,7 @@ const {
   createPostsWithTags,
 } = require("../endpointsTestHelpers");
 
-describe(`PUT ${POSTS_ENDPOINT}`, () => {
+describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
   let auhtorizedUser;
   let authToken;
 
@@ -142,5 +142,18 @@ describe(`PUT ${POSTS_ENDPOINT}`, () => {
     // console.log(updateRes.text);
     expect(updateRes.status).toBe(404); // get 404 error
     expect(updateRes.text).toContain(`not found`);
+  });
+
+  test("should throw an error on invalid id", async () => {
+    const invalidId = "asdf";
+    const updateRes = await request(app)
+      .put(`${POSTS_ENDPOINT}${invalidId}`)
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        title: "Yoooooooo",
+      });
+
+    expect(updateRes.status).toBe(400);
+    expect(updateRes.text).toBe(`"id" must be a number`);
   });
 });

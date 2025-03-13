@@ -5,8 +5,8 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const packageJson = require("../../package.json");
 
-function encodeToken(id) {
-  return jwt.sign({ sub: id, scope: "AUTHENTICATION" }, config.jwtSecret, {
+function encodeToken(id, scope) {
+  return jwt.sign({ sub: id, scope }, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
     issuer: packageJson.name,
     audience: packageJson.name,
@@ -19,13 +19,13 @@ async function decodeToken(token) {
 }
 
 /**
- * Checks if User has changed his password after JWT was issued. If he did, then old token is invalid.
- * Compares two numbers, because JWT uses seconds, not milliseconds after date conversion, it will convert first date to seconds and compare them.
+ * Checks if User has changed his password after JWT was issued.
  * @param {Date} userChangedPasswordAt normal date object/date in milliseconds
  * @param {number} tokenIssuedAt number, representing date in seconds
- * @throws {Error} if user recently changed his password. Otherwise nothing happens
+ * @returns {boolean} true if password was changed, false if it wasnt changed
  */
 function userChangedPasswordAfter(userChangedPasswordAt, tokenIssuedAt) {
+  // Compares two numbers, because JWT uses seconds, not milliseconds after date conversion, it will convert first date to seconds and compare them.
   if (userChangedPasswordAt && userChangedPasswordAt / 1000 > tokenIssuedAt) {
     return true;
   }

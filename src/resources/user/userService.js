@@ -37,7 +37,7 @@ async function authenticateUser(email, candidatePassword) {
     throw new HttpBadRequestError("Invalid credentials");
   }
   // 4.sign token
-  const token = jwtService.encodeToken(foundUser.id);
+  const token = jwtService.encodeToken(foundUser.id, "AUTHENTICATION");
 
   return {
     user: foundUser,
@@ -51,7 +51,7 @@ async function authenticateUser(email, candidatePassword) {
  */
 async function userSignup(userData) {
   const newUser = await User.create(userData);
-  const token = jwtService.encodeToken(newUser.id);
+  const token = jwtService.encodeToken(newUser.id, "AUTHENTICATION");
 
   return {
     user: newUser,

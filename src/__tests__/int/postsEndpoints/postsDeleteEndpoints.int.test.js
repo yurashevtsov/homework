@@ -96,4 +96,15 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
     expect(res.status).toBe(404);
     expect(res.text).toContain("not found"); // Post with that id 9999999999999999999 is not found
   });
+
+  test("should throw an error on invalid id", async () => {
+    const invalidId = "asd";
+    const res = await request(app)
+      .delete(`${POSTS_ENDPOINT}${invalidId}`)
+      .set("Authorization", `Bearer ${authToken}`);
+
+    // console.log(res.text);
+    expect(res.status).toBe(400);
+    expect(res.text).toContain(`"id" must be a number`); // Post with that id 9999999999999999999 is not found
+  });
 });

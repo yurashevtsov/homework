@@ -9,6 +9,7 @@
     "test-users:int": "cross-env NODE_ENV=test jest --testRegex='users.*\\.int\\.test\\.js$' --runInBand --verbose",
     "test-posts:int": "cross-env NODE_ENV=test jest --testRegex='posts.*\\.int\\.test\\.js$' --runInBand --verbose",
     "test-tags:int": "cross-env NODE_ENV=test jest --testRegex='tags.*\\.int\\.test\\.js$' --runInBand --verbose",
+    "test-auth:int": "cross-env NODE_ENV=test jest --testRegex='auth.*\\.int\\.test\\.js$' --runInBand --verbose",
     "migrate:dev": "cross-env NODE_ENV=development npx sequelize-cli db:migrate",
     "migrate:dev-undo": "cross-env NODE_ENV=development npx sequelize-cli db:migrate:undo:all",
     "migrate:test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate",
