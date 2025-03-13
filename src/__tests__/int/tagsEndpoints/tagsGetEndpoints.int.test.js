@@ -10,7 +10,7 @@ const {
   clearUserTable,
   clearTagTable,
   createTags,
-} = require("@src/__tests__/endpointsTestHelpers");
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`GET tags endpoints`, () => {
   let auhtorizedUser;

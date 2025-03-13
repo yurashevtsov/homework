@@ -9,7 +9,7 @@ const {
   closeDB,
   clearUserTable,
   clearTagTable,
-} = require("@src/__tests__/endpointsTestHelpers");
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`POST ${TAGS_ENDPOINT}`, () => {
   let auhtorizedUser;

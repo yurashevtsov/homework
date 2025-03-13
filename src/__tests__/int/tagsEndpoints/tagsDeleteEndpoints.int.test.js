@@ -10,7 +10,7 @@ const {
   clearUserTable,
   clearTagTable,
   createTags,
-} = require("@src/__tests__/endpointsTestHelpers");
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`GET tags endpoints`, () => {
   let auhtorizedUser;
@@ -66,7 +66,7 @@ describe(`GET tags endpoints`, () => {
 
     test("should throw an error on invalid tag id", async () => {
       const invalidTagId = "asd";
-      
+
       const deleteRes = await request(app)
         .delete(`${TAGS_ENDPOINT}${invalidTagId}`)
         .set("Authorization", `Bearer ${authToken}`);

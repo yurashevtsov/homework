@@ -62,9 +62,11 @@ async function deleteTagById(id) {
 /**
  * Find or creates tags
  * @param {string[]} tagNamesArr an array of tag names ["meme", "sports" "politics"]
- * @returns {object[]}  array containing tags of created/found id
+ * @returns {object[]}  array containing tags of created/found tags
  */
 async function findOrCreateTags(tagNamesArr, transaction) {
+  //removing dublicates just in case
+  tagNamesArr = [...new Set(tagNamesArr)];
   // Getting existing tags
   const fetchedTags = await Tag.findAll({
     where: {

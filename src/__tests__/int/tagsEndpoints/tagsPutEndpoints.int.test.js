@@ -10,7 +10,7 @@ const {
   clearUserTable,
   clearTagTable,
   createTags,
-} = require("@src/__tests__/endpointsTestHelpers");
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`GET tags endpoints`, () => {
   let auhtorizedUser;
@@ -39,7 +39,6 @@ describe(`GET tags endpoints`, () => {
     await closeDB();
   });
 
-  // ! finish tests
   describe(`PUT ${TAGS_ENDPOINT}:id`, () => {
     test("should update tag by id", async () => {
       const updatedTagName = { name: "updated name" };
