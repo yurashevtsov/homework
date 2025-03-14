@@ -39,7 +39,9 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
   });
 
   afterAll(async () => {
-    await Promise.all([clearPostTable(), clearTagTable(), clearUserTable()]);
+    await clearPostTable();
+    await clearTagTable();
+    await clearUserTable();
     await closeDB();
   });
 

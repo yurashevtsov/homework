@@ -44,7 +44,8 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
 
   afterEach(async () => {
     // clearing table/tags tables after each test
-    await Promise.all([clearPostTable(), clearTagTable()]);
+    await clearPostTable();
+    await clearTagTable();
   });
 
   test("should update post data", async () => {

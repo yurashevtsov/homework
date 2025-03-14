@@ -35,7 +35,8 @@ describe(`GET tags endpoints`, () => {
   });
 
   afterAll(async () => {
-    await Promise.all([clearUserTable(), clearTagTable()]);
+    await clearUserTable();
+    await clearTagTable();
     await closeDB();
   });
 

@@ -44,7 +44,9 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
   });
 
   afterAll(async () => {
-    await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
+    await clearUserTable();
+    await clearPostTable();
+    await clearTagTable();
     await closeDB();
   });
 

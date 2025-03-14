@@ -36,6 +36,8 @@ describe(`GET tags endpoints`, () => {
 
   afterAll(async () => {
     await Promise.all([clearUserTable(), clearTagTable()]);
+    await clearTagTable();
+    await clearUserTable();
     await closeDB();
   });
 
@@ -54,7 +56,7 @@ describe(`GET tags endpoints`, () => {
         .set("Authorization", `Bearer ${authToken}`)
         .send(updatedTagName);
 
-      console.log(updateRes.text);
+      // console.log(updateRes.text);
       expect(updateRes.status).toBe(200);
       expect(updateRes.body.name).toBe(expectedTagName);
     });

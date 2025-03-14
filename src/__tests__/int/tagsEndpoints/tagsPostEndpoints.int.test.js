@@ -34,7 +34,8 @@ describe(`POST ${TAGS_ENDPOINT}`, () => {
   });
 
   afterAll(async () => {
-    await Promise.all([clearUserTable(), clearTagTable()]);
+    await clearTagTable();
+    await clearUserTable();
     await closeDB();
   });
 

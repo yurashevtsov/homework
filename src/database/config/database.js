@@ -23,6 +23,7 @@ module.exports = {
     dialectOptions: {
       bigNumberStrings: true,
     },
+    logging: false,
   },
   // production: {
   //   username: process.env.PROD_DB_USERNAME,
