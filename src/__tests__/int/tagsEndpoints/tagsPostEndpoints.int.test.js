@@ -1,7 +1,10 @@
 const request = require("supertest");
 const app = require("@src/app");
 
-const TAGS_ENDPOINT = "/api/homework/tags/";
+const {
+  API,
+  TAGS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/tagApiRequest");
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
@@ -38,10 +41,7 @@ describe(`POST ${TAGS_ENDPOINT}`, () => {
   test("should create a new tag", async () => {
     const tagData = { name: "newTag" }; // Данные тега для создания
 
-    const res = await request(app)
-      .post(TAGS_ENDPOINT)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send(tagData);
+    const res = await API.createTag(tagData, AUTHORIZED_USER.token);
 
     // console.log(res.text);
     expect(res.status).toBe(201);
@@ -51,10 +51,7 @@ describe(`POST ${TAGS_ENDPOINT}`, () => {
 
   test("should throw error if name is missing", async () => {
     const tagData = {};
-    const res = await request(app)
-      .post(TAGS_ENDPOINT)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send(tagData);
+    const res = await API.createTag(tagData, AUTHORIZED_USER.token);
 
     // console.log(res.text);
     expect(res.status).toBe(400);

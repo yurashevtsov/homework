@@ -1,7 +1,10 @@
 const request = require("supertest");
 const app = require("@src/app");
 
-const TAGS_ENDPOINT = "/api/homework/tags/";
+const {
+  API,
+  TAGS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/tagApiRequest");
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {

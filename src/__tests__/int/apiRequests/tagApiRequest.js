@@ -32,9 +32,9 @@ const API = {
    * @param {string} token - The Bearer token for authorization.
    * @returns {Promise<Response>} A promise that resolves to the response object.
    */
-  createtag: (tagData, token) => {
+  createTag: (tagData, token) => {
     return request(app)
-      .tag(TAGS_ENDPOINT)
+      .post(TAGS_ENDPOINT)
       .set("Authorization", `Bearer ${token}`)
       .send(tagData);
   },

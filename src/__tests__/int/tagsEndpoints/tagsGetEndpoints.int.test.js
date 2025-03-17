@@ -1,7 +1,7 @@
-const request = require("supertest");
-const app = require("@src/app");
-
-const TAGS_ENDPOINT = "/api/homework/tags/";
+const {
+  API,
+  TAGS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/tagApiRequest");
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
@@ -41,9 +41,7 @@ describe(`GET tags endpoints`, () => {
       // create 2 tags
       let [tag1, tag2] = await createTags("gw1, gw2");
 
-      const res = await request(app)
-        .get(TAGS_ENDPOINT)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getAllTags(AUTHORIZED_USER.token);
 
       tag1 = tag1.toJSON();
       tag2 = tag2.toJSON();
@@ -61,9 +59,7 @@ describe(`GET tags endpoints`, () => {
       // create 2 tags
       let [tag1, tag2] = await createTags("gw1, gw2");
 
-      const res = await request(app)
-        .get(`${TAGS_ENDPOINT}${tag1.id}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOneTag(tag1.id, AUTHORIZED_USER.token);
 
       // console.log(res.text);
       expect(res.status).toBe(200);
@@ -76,9 +72,7 @@ describe(`GET tags endpoints`, () => {
     // create 2 tags
     await createTags("gw1, gw2");
 
-    const res = await request(app)
-      .get(`${TAGS_ENDPOINT}${tagId}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+    const res = await API.getOneTag(tagId, AUTHORIZED_USER.token);
 
     // console.log(res.text);
     expect(res.status).toBe(404);
@@ -88,9 +82,7 @@ describe(`GET tags endpoints`, () => {
   test("should throw an error on invalid tag id", async () => {
     const invalidTagId = "asdf";
 
-    const res = await request(app)
-      .get(`${TAGS_ENDPOINT}${invalidTagId}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+    const res = await API.getOneTag(invalidTagId, AUTHORIZED_USER.token);
 
     // console.log(res.text);
     expect(res.status).toBe(400);

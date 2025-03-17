@@ -1,7 +1,7 @@
-const request = require("supertest");
-const app = require("@src/app");
-
-const TAGS_ENDPOINT = "/api/homework/tags/";
+const {
+  API,
+  TAGS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/tagApiRequest");
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
@@ -43,9 +43,10 @@ describe(`DELETE tags endpoints`, () => {
       // request to delete tag by id
       expect(createdTag).toHaveProperty("id");
 
-      const deleteRes = await request(app)
-        .delete(`${TAGS_ENDPOINT}${createdTag.id}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const deleteRes = await API.deletetag(
+        createdTag.id,
+        AUTHORIZED_USER.token
+      );
 
       expect(deleteRes.status).toBe(204);
     });
@@ -53,9 +54,7 @@ describe(`DELETE tags endpoints`, () => {
     test("should throw an error if post doesnt exists 404", async () => {
       const tagId = 999999999;
 
-      const deleteRes = await request(app)
-        .delete(`${TAGS_ENDPOINT}${tagId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const deleteRes = await API.deletetag(tagId, AUTHORIZED_USER.token);
       // console.log(deleteRes.text);
       expect(deleteRes.status).toBe(404);
       expect(deleteRes.text).toContain(`Tag with id ${tagId} not found`); //Tag with id 99999999 not found
@@ -64,9 +63,10 @@ describe(`DELETE tags endpoints`, () => {
     test("should throw an error on invalid tag id", async () => {
       const invalidTagId = "asd";
 
-      const deleteRes = await request(app)
-        .delete(`${TAGS_ENDPOINT}${invalidTagId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const deleteRes = await API.deletetag(
+        invalidTagId,
+        AUTHORIZED_USER.token
+      );
 
       // console.log(deleteRes.text);
       expect(deleteRes.status).toBe(400);
