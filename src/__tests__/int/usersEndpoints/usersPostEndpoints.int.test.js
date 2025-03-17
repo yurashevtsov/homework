@@ -8,8 +8,8 @@ const {
   closeDB,
 } = require("../endpointsTestHelpers");
 
-const USERS_ENDPOINT = "/api/homework/users/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const { API, USERS_ENDPOINT } = require("@src/__tests__/int/apiRequests");
 
 describe(`POST ${USERS_ENDPOINT}`, () => {
   let AUTHORIZED_USER;
@@ -36,16 +36,16 @@ describe(`POST ${USERS_ENDPOINT}`, () => {
   });
 
   test("should create a new user with valid input", async () => {
-    const res = await request(app)
-      .post(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
+    const res = await API.createUser(
+      {
         username: "testuser1234",
         email: "test1234@example.com",
         avatar: "somefancyavatar.png",
         password: "password1234",
         repeatPassword: "password1234",
-      });
+      },
+      AUTHORIZED_USER.token
+    );
 
     // console.log(res.text);
     expect(res.status).toBe(201);
@@ -60,16 +60,16 @@ describe(`POST ${USERS_ENDPOINT}`, () => {
   });
 
   test("Should throw an error on missing field", async () => {
-    const res = await request(app)
-      .post(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
+    const res = await API.createUser(
+      {
         username: "testuser1234",
         email: "test1234@example.com",
         avatar: "somefancyavatar.png",
         password: "password1234",
         //missing field repeatPassword: "password1234",
-      });
+      },
+      AUTHORIZED_USER.token
+    );
 
     // console.log(res.text);
     expect(res.status).toBe(400);
@@ -79,15 +79,15 @@ describe(`POST ${USERS_ENDPOINT}`, () => {
   test("Should fail authentication with invalid token", async () => {
     const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
-    const res = await request(app)
-      .post(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${forgedToken}`)
-      .send({
+    const res = await API.createUser(
+      {
         username: "postUser",
         email: "postuser@mail.com",
         password: "pass1234",
         repeatPassword: "pass1234",
-      });
+      },
+      forgedToken
+    );
 
     expect(res.status).toBe(400);
     expect(res.text).toContain("invalid token");

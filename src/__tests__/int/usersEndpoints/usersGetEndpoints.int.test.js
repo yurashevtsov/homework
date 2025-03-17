@@ -1,13 +1,11 @@
-const request = require("supertest");
-const app = require("@src/app");
 const {
   clearUserTable,
   initDB,
   closeDB,
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
-const USERS_ENDPOINT = "/api/homework/users/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const {API, USERS_ENDPOINT} = require("@src/__tests__/int/apiRequests");
 
 describe("Endpoint require authorization", () => {
   let AUTHORIZED_USER;
@@ -31,9 +29,7 @@ describe("Endpoint require authorization", () => {
 
   describe(`GET ${USERS_ENDPOINT}`, () => {
     test("Should correctly find existing users", async () => {
-      const res = await request(app)
-        .get(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getAllUsers(AUTHORIZED_USER.token);
 
       expect(res.status).toBe(200);
       expect(res.body.length).toEqual(1); // only 1 user was created initially
@@ -44,9 +40,7 @@ describe("Endpoint require authorization", () => {
     test("Should fail authentication with invalid token", async () => {
       const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
-      const res = await request(app)
-        .get(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${forgedToken}`);
+      const res = await API.getAllUsers(forgedToken);
 
       expect(res.status).toBe(400);
       expect(res.text).toContain("invalid token");
@@ -55,9 +49,10 @@ describe("Endpoint require authorization", () => {
 
   describe(`GET ${USERS_ENDPOINT}:id`, () => {
     test("should get one user by id", async () => {
-      const res = await request(app)
-        .get(`${USERS_ENDPOINT}${AUTHORIZED_USER.id}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOneUser(
+        AUTHORIZED_USER.id,
+        AUTHORIZED_USER.token
+      );
 
       expect(res.status).toBe(200);
       expect(res.body.id).toEqual(AUTHORIZED_USER.id);
@@ -67,9 +62,7 @@ describe("Endpoint require authorization", () => {
 
     test("should throw an error 404 if non-existing user", async () => {
       const userId = 99999999999;
-      const res = await request(app)
-        .get(`${USERS_ENDPOINT}${userId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOneUser(userId, AUTHORIZED_USER.token);
 
       // console.log(res.text);
       expect(res.status).toBe(404);
@@ -78,9 +71,7 @@ describe("Endpoint require authorization", () => {
 
     test("should throw an error on invalid id", async () => {
       const invalidUserId = "asdf";
-      const res = await request(app)
-        .get(`${USERS_ENDPOINT}${invalidUserId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOneUser(invalidUserId, AUTHORIZED_USER.token);
 
       // console.log(res.text);
       expect(res.status).toBe(400);
@@ -89,10 +80,7 @@ describe("Endpoint require authorization", () => {
 
     test("Should fail authentication with invalid token", async () => {
       const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
-
-      const res = await request(app)
-        .get(`${USERS_ENDPOINT}${AUTHORIZED_USER.id}`)
-        .set("Authorization", `Bearer ${forgedToken}`);
+      const res = await API.getOneUser(AUTHORIZED_USER.id, forgedToken);
 
       expect(res.status).toBe(400);
       expect(res.text).toContain("invalid token");

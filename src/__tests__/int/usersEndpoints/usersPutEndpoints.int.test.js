@@ -8,8 +8,9 @@ const {
   closeDB,
 } = require("../endpointsTestHelpers");
 
-const USERS_ENDPOINT = "/api/homework/users/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const { API, USERS_ENDPOINT } = require("@src/__tests__/int/apiRequests");
+
 
 describe(`PUT ${USERS_ENDPOINT}:id`, () => {
   let AUTHORIZED_USER;
@@ -45,16 +46,13 @@ describe(`PUT ${USERS_ENDPOINT}:id`, () => {
     });
 
     // updating user fields
-    const updateRes = await request(app)
-      .put(`${USERS_ENDPOINT}${secondUser.id}`)
-      .set("Authorization", `Bearer ${secondUser.token}`)
-      .send({
-        // fields that should be updated (email is not allowed)
-        username: "updatedUser",
-        avatar: "avatarmeme.jpg",
-        password: "pass12345",
-        repeatPassword: "pass12345",
-      });
+    const updateRes = await API.updateUser(secondUser.id, secondUser.token, {
+      // fields that should be updated (email is not allowed)
+      username: "updatedUser",
+      avatar: "avatarmeme.jpg",
+      password: "pass12345",
+      repeatPassword: "pass12345",
+    });
 
     // to make sure, it was really updated in DB
     const updatedUser = await findUserById(secondUser.id);
@@ -76,33 +74,28 @@ describe(`PUT ${USERS_ENDPOINT}:id`, () => {
     });
 
     // updating user fields
-    const updateRes = await request(app)
-      .put(`${USERS_ENDPOINT}${secondUser.id}`)
-      .set("Authorization", `Bearer ${secondUser.token}`)
-      .send({
-        // fields that should be updated (email is not allowed)
-        username: "updatedUser",
-        avatar: "avatarmeme.jpg",
-        email: "anyemail@mail.com",
-        password: "pass12345",
-        repeatPassword: "pass12345",
-      });
+    const updateRes = await API.updateUser(secondUser.id, secondUser.token, {
+      // fields that should be updated (email is not allowed)
+      username: "updatedUser",
+      avatar: "avatarmeme.jpg",
+      email: "anyemail@mail.com",
+      password: "pass12345",
+      repeatPassword: "pass12345",
+    });
 
     expect(updateRes.status).toBe(400);
     expect(updateRes.text).toContain(`"email" is not allowed`);
   });
 
   test("should return 404 if non-existing user", async () => {
-    const res = await request(app)
-      .put(`${USERS_ENDPOINT}99999999999`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
-        // fields that should be updated (email is not allowed)
-        username: "updatedUser",
-        avatar: "avatarmeme.jpg",
-        password: "pass12345",
-        repeatPassword: "pass12345",
-      });
+    const userId = 9999999999;
+    const res = await API.updateUser(userId, AUTHORIZED_USER.token, {
+      // fields that should be updated (email is not allowed)
+      username: "updatedUser",
+      avatar: "avatarmeme.jpg",
+      password: "pass12345",
+      repeatPassword: "pass12345",
+    });
 
     expect(res.status).toBe(404);
     expect(res.text).toContain("User is not found");
@@ -111,9 +104,9 @@ describe(`PUT ${USERS_ENDPOINT}:id`, () => {
   test("Should fail authentication with invalid token", async () => {
     const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
-    const res = await request(app)
-      .put(`${USERS_ENDPOINT}${AUTHORIZED_USER.id}`)
-      .set("Authorization", `Bearer ${forgedToken}`);
+    const res = await API.updateUser(AUTHORIZED_USER.id, forgedToken, {
+      username: "wontupdate",
+    });
 
     expect(res.status).toBe(400);
     expect(res.text).toContain("invalid token");

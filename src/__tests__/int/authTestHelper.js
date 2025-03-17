@@ -12,7 +12,7 @@ const packageJson = require("../../../package.json");
 /**
  * creates a user and encode a token with authentication scope(like signup endpoint)
  *
- * @param {object} userData object with user details: username, email,password, repeatPassword
+ * @param {object} userData object with user details: username, email, password, repeatPassword
  * @returns {object} object with user and token - {user, token}
  */
 async function createUserWithToken(userData) {

@@ -5,7 +5,6 @@ const {
   initDB,
   closeDB,
   clearUserTable,
-  createUser,
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
 const USERS_ENDPOINT = "/api/homework/users/";

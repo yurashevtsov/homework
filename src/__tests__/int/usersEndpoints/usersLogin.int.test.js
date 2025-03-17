@@ -1,5 +1,3 @@
-const request = require("supertest");
-const app = require("@src/app");
 const {
   clearUserTable,
   createUser,
@@ -7,7 +5,7 @@ const {
   initDB,
 } = require("../endpointsTestHelpers");
 
-const LOGIN_ENDPOINT = "/api/homework/users/login";
+const { API, LOGIN_ENDPOINT } = require("@src/__tests__/int/apiRequests");
 
 describe("Login endpoint", () => {
   beforeAll(async () => {
@@ -35,7 +33,7 @@ describe("Login endpoint", () => {
       });
 
       // 2. logging in
-      const res = await request(app).post(LOGIN_ENDPOINT).send({
+      const res = await API.login({
         email: "loginendpoint@gmail.com",
         password: "pass1234",
       });
@@ -56,7 +54,7 @@ describe("Login endpoint", () => {
         repeatPassword: "pass1234",
       });
 
-      const res = await request(app).post(LOGIN_ENDPOINT).send({
+      const res = await API.login({
         email,
         password: maliciousPassword,
       });
@@ -68,7 +66,7 @@ describe("Login endpoint", () => {
     });
 
     test("Should not work if user doesnt exists", async () => {
-      const res = await request(app).post(LOGIN_ENDPOINT).send({
+      const res = await API.login({
         email: "random@mail.com",
         password: "pass1234",
       });

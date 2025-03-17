@@ -1,5 +1,3 @@
-const request = require("supertest");
-const app = require("@src/app");
 const {
   initDB,
   closeDB,
@@ -8,11 +6,11 @@ const {
   createUser,
 } = require("../endpointsTestHelpers");
 
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const { API, SIGNUP_ENDPOINT } = require("@src/__tests__/int/apiRequests");
 
 const NEW_USER_DATA = {
-  username: "sometestuser",
-  email: "someemail@mail.com",
+  username: "signupUser",
+  email: "signupemail@mail.com",
   password: "pass1234",
   repeatPassword: "pass1234",
 };
@@ -34,7 +32,7 @@ describe(`SIGNUP ENDPOINT \nPOST ${SIGNUP_ENDPOINT}`, () => {
 
   test("should create a new user", async () => {
     // signing up
-    const res = await request(app).post(SIGNUP_ENDPOINT).send(NEW_USER_DATA);
+    const res = await API.signup(NEW_USER_DATA);
 
     // making sure user exists in the db
     const createdUser = await findUserById(res.body.user.id);
@@ -54,7 +52,7 @@ describe(`SIGNUP ENDPOINT \nPOST ${SIGNUP_ENDPOINT}`, () => {
     // creating user
     await createUser(NEW_USER_DATA);
     // repeating request to try to create duplicate
-    const res = await request(app).post(SIGNUP_ENDPOINT).send(NEW_USER_DATA);
+    const res = await API.signup(NEW_USER_DATA);
 
     expect(res.status).toBe(400);
     expect(res.text).toContain(`username must be unique`);
@@ -98,7 +96,7 @@ describe(`SIGNUP ENDPOINT \nPOST ${SIGNUP_ENDPOINT}`, () => {
   invalidInputTests.forEach(
     async ({ description, invalidData, expectedMessage }, index) => {
       test(description, async () => {
-        const res = await request(app).post(SIGNUP_ENDPOINT).send(invalidData);
+        const res = await API.signup(invalidData);
 
         if (res.status !== 400 || !res.text.includes(expectedMessage)) {
           throw new Error(
