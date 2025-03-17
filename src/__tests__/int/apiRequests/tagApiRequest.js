@@ -46,7 +46,7 @@ const API = {
    * @param {object} tagUpdateData - The updated data for the tag.
    * @returns {Promise<Response>} A promise that resolves to the response object.
    */
-  updatetag: (tagId, token, updateData) => {
+  updateTag: (tagId, token, updateData) => {
     return request(app)
       .put(`${TAGS_ENDPOINT}${tagId}`)
       .set("Authorization", `Bearer ${token}`)
@@ -59,7 +59,7 @@ const API = {
    * @param {string} token - The Bearer token for authorization.
    * @returns {Promise<Response>} A promise that resolves to the response object.
    */
-  deletetag: (tagId, token) => {
+  deleteTag: (tagId, token) => {
     return request(app)
       .delete(`${TAGS_ENDPOINT}${tagId}`)
       .set("Authorization", `Bearer ${token}`);

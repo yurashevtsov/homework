@@ -43,7 +43,7 @@ describe(`DELETE tags endpoints`, () => {
       // request to delete tag by id
       expect(createdTag).toHaveProperty("id");
 
-      const deleteRes = await API.deletetag(
+      const deleteRes = await API.deleteTag(
         createdTag.id,
         AUTHORIZED_USER.token
       );
@@ -54,7 +54,7 @@ describe(`DELETE tags endpoints`, () => {
     test("should throw an error if post doesnt exists 404", async () => {
       const tagId = 999999999;
 
-      const deleteRes = await API.deletetag(tagId, AUTHORIZED_USER.token);
+      const deleteRes = await API.deleteTag(tagId, AUTHORIZED_USER.token);
       // console.log(deleteRes.text);
       expect(deleteRes.status).toBe(404);
       expect(deleteRes.text).toContain(`Tag with id ${tagId} not found`); //Tag with id 99999999 not found
@@ -63,7 +63,7 @@ describe(`DELETE tags endpoints`, () => {
     test("should throw an error on invalid tag id", async () => {
       const invalidTagId = "asd";
 
-      const deleteRes = await API.deletetag(
+      const deleteRes = await API.deleteTag(
         invalidTagId,
         AUTHORIZED_USER.token
       );

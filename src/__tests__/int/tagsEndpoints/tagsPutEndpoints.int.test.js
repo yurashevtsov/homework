@@ -50,10 +50,11 @@ describe(`GET tags endpoints`, () => {
       expect(createdTag).toHaveProperty("id");
       expect(createdTag.name).toBe("news");
       // update tag
-      const updateRes = await request(app)
-        .put(`${TAGS_ENDPOINT}${createdTag.id}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-        .send(updatedTagName);
+      const updateRes = await API.updateTag(
+        createdTag.id,
+        AUTHORIZED_USER.token,
+        updatedTagName
+      );
 
       // console.log(updateRes.text);
       expect(updateRes.status).toBe(200);
@@ -64,10 +65,11 @@ describe(`GET tags endpoints`, () => {
       const tagId = 9999999;
       const updatedTagName = { name: "updated name" };
 
-      const updateRes = await request(app)
-        .put(`${TAGS_ENDPOINT}${tagId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-        .send(updatedTagName);
+      const updateRes = await API.updateTag(
+        tagId,
+        AUTHORIZED_USER.token,
+        updatedTagName
+      );
 
       expect(updateRes.status).toBe(404);
       expect(updateRes.text).toContain("not found");
@@ -76,11 +78,11 @@ describe(`GET tags endpoints`, () => {
     test("should throw an error on inval tag id", async () => {
       const tagId = "asd";
       const updatedTagName = { name: "updated name" };
-
-      const updateRes = await request(app)
-        .put(`${TAGS_ENDPOINT}${tagId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-        .send(updatedTagName);
+      const updateRes = await API.updateTag(
+        tagId,
+        AUTHORIZED_USER.token,
+        updatedTagName
+      );
 
       // console.log(updateRes.text);
       expect(updateRes.status).toBe(400);
