@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("@src/app");
 
 const TAGS_ENDPOINT = "/api/homework/tags/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
   initDB,
@@ -12,21 +12,17 @@ const {
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`POST ${TAGS_ENDPOINT}`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
       username: "postUser",
       email: "postuser@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
   });
 
   afterEach(async () => {
@@ -44,7 +40,7 @@ describe(`POST ${TAGS_ENDPOINT}`, () => {
 
     const res = await request(app)
       .post(TAGS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send(tagData);
 
     // console.log(res.text);
@@ -57,7 +53,7 @@ describe(`POST ${TAGS_ENDPOINT}`, () => {
     const tagData = {};
     const res = await request(app)
       .post(TAGS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send(tagData);
 
     // console.log(res.text);

@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("@src/app");
 
 const TAGS_ENDPOINT = "/api/homework/tags/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
   initDB,
@@ -12,22 +12,18 @@ const {
   createTags,
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
-describe(`GET tags endpoints`, () => {
-  let auhtorizedUser;
-  let authToken;
+describe(`DELETE tags endpoints`, () => {
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "tagDelete",
+      email: "tagDelete@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
   });
 
   afterEach(async () => {
@@ -49,7 +45,7 @@ describe(`GET tags endpoints`, () => {
 
       const deleteRes = await request(app)
         .delete(`${TAGS_ENDPOINT}${createdTag.id}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       expect(deleteRes.status).toBe(204);
     });
@@ -59,7 +55,7 @@ describe(`GET tags endpoints`, () => {
 
       const deleteRes = await request(app)
         .delete(`${TAGS_ENDPOINT}${tagId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
       // console.log(deleteRes.text);
       expect(deleteRes.status).toBe(404);
       expect(deleteRes.text).toContain(`Tag with id ${tagId} not found`); //Tag with id 99999999 not found
@@ -70,7 +66,7 @@ describe(`GET tags endpoints`, () => {
 
       const deleteRes = await request(app)
         .delete(`${TAGS_ENDPOINT}${invalidTagId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(deleteRes.text);
       expect(deleteRes.status).toBe(400);

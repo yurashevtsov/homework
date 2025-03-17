@@ -8,36 +8,25 @@ const {
   closeDB,
 } = require("../endpointsTestHelpers");
 
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
-const username = "sometestuser";
-const email = "unauthorizedtest@mail.com";
-const password = "pass1234";
-const repeatPassword = "pass1234";
+describe(`POST ${USERS_ENDPOINT}`, () => {
+  let AUTHORIZED_USER;
 
-const NEW_USER_DATA = {
-  username,
-  email,
-  password,
-  repeatPassword,
-};
-
-describe("Require authorization", () => {
-  let auhtorizedUser;
-  let authToken;
-
-  // Connecting to a database
   beforeAll(async () => {
     await initDB();
 
-    // Create user before testing authorization routes
-    const response = await request(app)
-      .post(SIGNUP_ENDPOINT)
-      .send(NEW_USER_DATA);
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "postUser",
+      email: "postuser@mail.com",
+      password: "pass1234",
+      repeatPassword: "pass1234",
+    });
+  });
 
-    auhtorizedUser = response.body.user;
-    authToken = response.body.token;
+  afterEach(async () => {
+    await partialUserTableClear(AUTHORIZED_USER.id);
   });
 
   afterAll(async () => {
@@ -46,64 +35,61 @@ describe("Require authorization", () => {
     await closeDB();
   });
 
-  describe("POST /api/homework/users", () => {
-    // this just creates user, no token
-    // CLEARING DB (not pre-defined user) after each test
-    afterEach(async () => {
-      await partialUserTableClear(auhtorizedUser.id);
-    });
+  test("should create a new user with valid input", async () => {
+    const res = await request(app)
+      .post(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
+      .send({
+        username: "testuser1234",
+        email: "test1234@example.com",
+        avatar: "somefancyavatar.png",
+        password: "password1234",
+        repeatPassword: "password1234",
+      });
 
-    test("should create a new user with valid input", async () => {
-      const res = await request(app)
-        .post(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${authToken}`)
-        .send({
-          username: "testuser1234",
-          email: "test1234@example.com",
-          avatar: "somefancyavatar.png",
-          password: "password1234",
-          repeatPassword: "password1234",
-        });
+    // console.log(res.text);
+    expect(res.status).toBe(201);
+    expect(res.body.username).toBeDefined();
+    expect(res.body.email).toBeDefined();
+    expect(res.body.password).not.toBeDefined();
 
-      // console.log(res.text);
-      expect(res.status).toBe(201);
-      expect(res.body.username).toBeDefined();
-      expect(res.body.email).toBeDefined();
-      expect(res.body.password).not.toBeDefined();
+    const user = await findUserById(res.body.id);
+    expect(user.username).toBe("testuser1234");
+    expect(user.email).toBe("test1234@example.com");
+    expect(user.password).not.toBeDefined();
+  });
 
-      const user = await findUserById(res.body.id);
-      expect(user.username).toBe("testuser1234");
-      expect(user.email).toBe("test1234@example.com");
-      expect(user.password).not.toBeDefined();
-    });
+  test("Should throw an error on missing field", async () => {
+    const res = await request(app)
+      .post(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
+      .send({
+        username: "testuser1234",
+        email: "test1234@example.com",
+        avatar: "somefancyavatar.png",
+        password: "password1234",
+        //missing field repeatPassword: "password1234",
+      });
 
-    test("Should throw an error on missing field", async () => {
-      const res = await request(app)
-        .post(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${authToken}`)
-        .send({
-          username: "testuser1234",
-          email: "test1234@example.com",
-          avatar: "somefancyavatar.png",
-          password: "password1234",
-          //missing field repeatPassword: "password1234",
-        });
+    // console.log(res.text);
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("is required");
+  });
 
-      // console.log(res.text);
-      expect(res.status).toBe(400);
-      expect(res.text).toContain("is required");
-    });
+  test("Should fail authentication with invalid token", async () => {
+    const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
-    test("Should fail authentication with invalid token", async () => {
-      const forgedToken = "a" + authToken.slice(1);
+    const res = await request(app)
+      .post(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${forgedToken}`)
+      .send({
+        username: "postUser",
+        email: "postuser@mail.com",
+        password: "pass1234",
+        repeatPassword: "pass1234",
+      });
 
-      const res = await request(app)
-        .post(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${forgedToken}`)
-        .send(NEW_USER_DATA);
-
-      expect(res.status).toBe(400);
-      expect(res.text).toContain("invalid token");
-    });
+    expect(res.status).toBe(400);
+    expect(res.text).toContain("invalid token");
   });
 });

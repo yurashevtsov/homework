@@ -5,8 +5,8 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const packageJson = require("../../package.json");
 
-function encodeToken(id, scope) {
-  return jwt.sign({ sub: id, scope }, config.jwtSecret, {
+function encodeToken(sub, scope) {
+  return jwt.sign({ ...sub, scope }, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn,
     issuer: packageJson.name,
     audience: packageJson.name,

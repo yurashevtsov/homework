@@ -2,13 +2,7 @@ const request = require("supertest");
 const app = require("@src/app");
 
 const POSTS_ENDPOINT = "/api/homework/posts/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
-
-const POST_TO_CREATE = {
-  title: "some title",
-  content: "some content",
-  tags: "politics",
-};
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
   initDB,
@@ -16,26 +10,26 @@ const {
   clearPostTable,
   clearTagTable,
   clearUserTable,
-  findPostWithTags,
+  createPostsWithTags,
 } = require("../endpointsTestHelpers");
-const req = require("express/lib/request");
 
 describe(`DELETE ${POSTS_ENDPOINT}`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "deleteendpoint",
+      email: "deleteendpoint@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
+  });
 
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
+  afterEach(async () => {
+    await clearPostTable();
+    await clearTagTable();
   });
 
   afterAll(async () => {
@@ -47,42 +41,48 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
 
   test("should delete a post by id", async () => {
     // 1.create post
-    const createRes = await request(app)
-      .post(POSTS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`)
-      .send(POST_TO_CREATE);
+    const [newPost] = await createPostsWithTags([
+      {
+        userId: AUTHORIZED_USER.id,
+        title: "sometitle",
+        content: "somecontent",
+        tags: "gw1",
+      },
+    ]);
 
-    expect(createRes.status).toBe(201);
+    expect(newPost.id).toBeDefined();
     // 2.delete post
     const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}${createRes.body.id}`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .delete(`${POSTS_ENDPOINT}${newPost.id}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     expect(res.status).toBe(204);
   });
 
   test("Should not delete someone's else posts (404)", async () => {
     // create a post
-    const createdPostRes = await request(app)
-      .post(POSTS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`)
-      .send(POST_TO_CREATE);
+    const [firstUserPost] = await createPostsWithTags([
+      {
+        userId: AUTHORIZED_USER.id,
+        title: "sometitle",
+        content: "somecontent",
+        tags: "gw1",
+      },
+    ]);
 
-    expect(createdPostRes.status).toBe(201);
+    expect(firstUserPost.id).toBeDefined();
     // login(signup) as someone else and try to delete original post
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
+    const secondUser = await authTestHelper.createUserWithToken({
       username: "anotherUser",
       email: "anotheruser@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
 
-    const secondUser = signupRes.body.user;
-    const secondUserToken = signupRes.body.token;
     // trying to delete original post with second user
     const deleteRes = await request(app)
-      .delete(`${POSTS_ENDPOINT}${createdPostRes.body.id}`)
-      .set("Authorization", `Bearer ${secondUserToken}`);
+      .delete(`${POSTS_ENDPOINT}${firstUserPost.id}`)
+      .set("Authorization", `Bearer ${secondUser.token}`);
 
     // console.log(deleteRes.text);
     expect(deleteRes.status).toBe(404);
@@ -90,9 +90,10 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
   });
 
   test("Should return 404 if post doesnt exists", async () => {
+    const nonExistingId = 999999999;
     const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}999999999999`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .delete(`${POSTS_ENDPOINT}${nonExistingId}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     // console.log(res.text);
     expect(res.status).toBe(404);
@@ -103,7 +104,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
     const invalidId = "asd";
     const res = await request(app)
       .delete(`${POSTS_ENDPOINT}${invalidId}`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     // console.log(res.text);
     expect(res.status).toBe(400);

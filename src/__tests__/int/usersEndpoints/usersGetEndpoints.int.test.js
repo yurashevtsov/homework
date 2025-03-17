@@ -1,37 +1,26 @@
 const request = require("supertest");
 const app = require("@src/app");
-const { clearUserTable, initDB, closeDB } = require("../endpointsTestHelpers");
+const {
+  clearUserTable,
+  initDB,
+  closeDB,
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";
-
-const username = "sometestuser";
-const email = "unauthorizedtest@mail.com";
-const password = "pass1234";
-const repeatPassword = "pass1234";
-
-const NEW_USER_DATA = {
-  username,
-  email,
-  password,
-  repeatPassword,
-};
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 describe("Endpoint require authorization", () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
-  // Connecting to a database
   beforeAll(async () => {
     await initDB();
 
-    // Create user before testing authorization routes
-    const response = await request(app)
-      .post(SIGNUP_ENDPOINT)
-      .send(NEW_USER_DATA);
-
-    auhtorizedUser = response.body.user;
-    authToken = response.body.token;
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "postUser",
+      email: "postuser@mail.com",
+      password: "pass1234",
+      repeatPassword: "pass1234",
+    });
   });
 
   afterAll(async () => {
@@ -44,16 +33,16 @@ describe("Endpoint require authorization", () => {
     test("Should correctly find existing users", async () => {
       const res = await request(app)
         .get(USERS_ENDPOINT)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       expect(res.status).toBe(200);
       expect(res.body.length).toEqual(1); // only 1 user was created initially
-      expect(res.body[0].username).toEqual(auhtorizedUser.username);
-      expect(res.body[0].email).toEqual(auhtorizedUser.email);
+      expect(res.body[0].username).toEqual(AUTHORIZED_USER.username);
+      expect(res.body[0].email).toEqual(AUTHORIZED_USER.email);
     });
 
     test("Should fail authentication with invalid token", async () => {
-      const forgedToken = "a" + authToken.slice(1);
+      const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
       const res = await request(app)
         .get(USERS_ENDPOINT)
@@ -67,20 +56,20 @@ describe("Endpoint require authorization", () => {
   describe(`GET ${USERS_ENDPOINT}:id`, () => {
     test("should get one user by id", async () => {
       const res = await request(app)
-        .get(`${USERS_ENDPOINT}${auhtorizedUser.id}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .get(`${USERS_ENDPOINT}${AUTHORIZED_USER.id}`)
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.id).toEqual(auhtorizedUser.id);
-      expect(res.body.username).toEqual(auhtorizedUser.username);
-      expect(res.body.email).toEqual(auhtorizedUser.email);
+      expect(res.body.id).toEqual(AUTHORIZED_USER.id);
+      expect(res.body.username).toEqual(AUTHORIZED_USER.username);
+      expect(res.body.email).toEqual(AUTHORIZED_USER.email);
     });
 
     test("should throw an error 404 if non-existing user", async () => {
-      const userId = 999999999999;
+      const userId = 99999999999;
       const res = await request(app)
         .get(`${USERS_ENDPOINT}${userId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(res.text);
       expect(res.status).toBe(404);
@@ -91,7 +80,7 @@ describe("Endpoint require authorization", () => {
       const invalidUserId = "asdf";
       const res = await request(app)
         .get(`${USERS_ENDPOINT}${invalidUserId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(res.text);
       expect(res.status).toBe(400);
@@ -99,10 +88,10 @@ describe("Endpoint require authorization", () => {
     });
 
     test("Should fail authentication with invalid token", async () => {
-      const forgedToken = "a" + authToken.slice(1);
+      const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
       const res = await request(app)
-        .get(`${USERS_ENDPOINT}${auhtorizedUser.id}`)
+        .get(`${USERS_ENDPOINT}${AUTHORIZED_USER.id}`)
         .set("Authorization", `Bearer ${forgedToken}`);
 
       expect(res.status).toBe(400);

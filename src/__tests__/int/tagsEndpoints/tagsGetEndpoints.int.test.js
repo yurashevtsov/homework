@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("@src/app");
 
 const TAGS_ENDPOINT = "/api/homework/tags/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const {
   initDB,
@@ -13,21 +13,17 @@ const {
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
 describe(`GET tags endpoints`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "getTagEndpoint",
+      email: "getTagEndpoint@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
   });
 
   afterEach(async () => {
@@ -47,7 +43,7 @@ describe(`GET tags endpoints`, () => {
 
       const res = await request(app)
         .get(TAGS_ENDPOINT)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       tag1 = tag1.toJSON();
       tag2 = tag2.toJSON();
@@ -65,11 +61,9 @@ describe(`GET tags endpoints`, () => {
       // create 2 tags
       let [tag1, tag2] = await createTags("gw1, gw2");
 
-      tag1 = tag1.toJSON();
-
       const res = await request(app)
         .get(`${TAGS_ENDPOINT}${tag1.id}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(res.text);
       expect(res.status).toBe(200);
@@ -84,7 +78,7 @@ describe(`GET tags endpoints`, () => {
 
     const res = await request(app)
       .get(`${TAGS_ENDPOINT}${tagId}`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     // console.log(res.text);
     expect(res.status).toBe(404);
@@ -93,12 +87,10 @@ describe(`GET tags endpoints`, () => {
 
   test("should throw an error on invalid tag id", async () => {
     const invalidTagId = "asdf";
-    // create 2 tags
-    await createTags("gw1, gw2");
 
     const res = await request(app)
       .get(`${TAGS_ENDPOINT}${invalidTagId}`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     // console.log(res.text);
     expect(res.status).toBe(400);

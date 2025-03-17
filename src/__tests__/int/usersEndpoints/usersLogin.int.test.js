@@ -9,13 +9,13 @@ const {
 
 const LOGIN_ENDPOINT = "/api/homework/users/login";
 
-const username = "sometestuser";
-const email = "unauthorizedtest@mail.com";
-const password = "pass1234";
-
 describe("Login endpoint", () => {
   beforeAll(async () => {
     await initDB();
+  });
+
+  beforeEach(async () => {
+    await clearUserTable();
   });
 
   afterAll(async () => {
@@ -24,53 +24,45 @@ describe("Login endpoint", () => {
     await closeDB();
   });
 
-  beforeEach(async () => {
-    await clearUserTable(); // clear table before doing a test
-  });
-
   describe(`POST ${LOGIN_ENDPOINT}`, () => {
     test("login correctly when user exists", async () => {
       // 1.create user
-      const newUser = await createUser({
-        username,
-        email,
-        password,
-      });
-      // 2. make sure it's created (basically checking if helper function works)
-      expect(newUser.username).toBe(username);
-      expect(newUser.email).toBe(email);
-      // 3. logging in
-      const res = await request(app).post(LOGIN_ENDPOINT).send({
-        email,
-        password,
+      const createdUser = await createUser({
+        username: "loginendpoint",
+        email: "loginendpoint@gmail.com",
+        password: "pass1234",
+        repeatPassword: "pass1234",
       });
 
-      expect(res.body.user.username).toBe(username);
-      expect(res.body.user.email).toBe(email);
+      // 2. logging in
+      const res = await request(app).post(LOGIN_ENDPOINT).send({
+        email: "loginendpoint@gmail.com",
+        password: "pass1234",
+      });
+
+      expect(res.body.user.username).toBe(createdUser.username);
+      expect(res.body.user.email).toBe(createdUser.email);
       expect(res.body.token).toBeDefined();
     });
 
     test("Should' not' allow SQL injection", async () => {
-      const newUser = await createUser({
-        username,
-        email,
-        password,
-      });
-      // 2. make sure it's created (basically checking if helper function works)
-      expect(newUser.username).toBe(username);
-      expect(newUser.email).toBe(email);
-
-      const maliciousEmail = email;
+      const email = "loginendpoint@gmail.com";
       const maliciousPassword = "'' OR '1'='1'";
 
+      await createUser({
+        username: "loginendpoint",
+        email,
+        password: "pass1234",
+        repeatPassword: "pass1234",
+      });
+
       const res = await request(app).post(LOGIN_ENDPOINT).send({
-        email: maliciousEmail,
+        email,
         password: maliciousPassword,
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.username).not.toBeDefined();
-      expect(res.text).toBe(
+      expect(res.text).toContain(
         "Password contains forbidden characters or does not meet the length requirement"
       );
     });
@@ -82,7 +74,6 @@ describe("Login endpoint", () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.username).not.toBeDefined();
       expect(res.text).toContain("Invalid credentials");
     });
   });

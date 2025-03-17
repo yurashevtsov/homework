@@ -14,7 +14,7 @@ const appFeatures = require("@src/utils/appFeatures.js");
 async function getAllPostsNoTags(userId, queryParams) {
   const initQuery = {
     where: {
-      userId,
+      // userId, // probably should allow to find all posts even if user didnt create it
     },
   };
 
@@ -27,7 +27,7 @@ async function getAllPostsNoTags(userId, queryParams) {
 async function getAllPostsWithTags(userId, queryParams) {
   const initQuery = {
     where: {
-      userId,
+      // userId, // probably should allow to find all posts even if user didnt create it
     },
     include: {
       model: Tag,
@@ -48,7 +48,7 @@ async function getOnePostByIdNoTags(postId, userId) {
   const post = await Post.findOne({
     where: {
       id: postId,
-      userId,
+      // userId, // probably should allow to find all posts even if user didnt create it
     },
   });
 
@@ -73,7 +73,7 @@ async function getOnePostWithAllTags(postId, userId) {
   const postWithTags = await Post.findOne({
     where: {
       id: postId,
-      userId,
+      // userId, // probably should allow to find all posts even if user didnt create it
     },
     include: {
       // association: "tags",

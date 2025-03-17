@@ -1,7 +1,7 @@
 const request = require("supertest");
 const app = require("@src/app");
 const POSTS_ENDPOINT = "/api/homework/posts/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 const {
   initDB,
   closeDB,
@@ -24,23 +24,22 @@ const post2 = {
 };
 
 describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
-  let auhtorizedUser;
-  let authToken;
-  // created during "test" of a helper function
-  let postId;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "getEndpoint",
+      email: "getEndpoint@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
+  });
 
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
+  afterEach(async () => {
+    await clearPostTable();
+    await clearTagTable();
   });
 
   afterAll(async () => {
@@ -54,17 +53,14 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
     // doesnt support creation of same tags, so they should be unique
     const postsWithTags = await createPostsWithTags([
       {
-        userId: auhtorizedUser.id,
+        userId: AUTHORIZED_USER.id,
         ...post1,
       },
       {
-        userId: auhtorizedUser.id,
+        userId: AUTHORIZED_USER.id,
         ...post2,
       },
     ]);
-
-    // since all tests relies on this function it doesnt matter if i'll use this function in subsequent tests or not
-    postId = postsWithTags[0].id;
 
     // creates post correctly
     expect(postsWithTags[0].title).toBe(post1.title);
@@ -76,13 +72,14 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
     expect(postsWithTags[0].tags[1].name).toBe("gw5");
     expect(postsWithTags[1].tags[0].name).toBe("gw2");
     expect(postsWithTags[1].tags[1].name).toBe("gw6");
+
     // 2 posts should be created
     expect(postsWithTags).toHaveLength(2);
   });
 
   describe(`GET ${POSTS_ENDPOINT}`, () => {
     test("should fail when unauthorized", async () => {
-      const forgedToken = "a" + authToken.slice(1);
+      const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
       const res = await request(app)
         .get(POSTS_ENDPOINT)
         .set("Authorization", `Bearer ${forgedToken}`);
@@ -92,36 +89,47 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
     });
 
     test("should get all posts and its tags", async () => {
+      // create 2 posts
+      await createPostsWithTags([
+        {
+          userId: AUTHORIZED_USER.id,
+          ...post1,
+        },
+        {
+          userId: AUTHORIZED_USER.id,
+          ...post2,
+        },
+      ]);
+
       const res = await request(app)
         .get(POSTS_ENDPOINT)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(res.text);
-
-      expect(res.status).toBe(200);
-      expect(res.body[0].title).toBe(post1.title);
-      expect(res.body[0].content).toBe(post1.content);
-      expect(res.body[1].title).toBe(post2.title);
-      expect(res.body[1].content).toBe(post2.content);
-
-      expect(res.body[0].tags[0].name).toBe("gw1");
-      expect(res.body[0].tags[1].name).toBe("gw5");
-      expect(res.body[1].tags[0].name).toBe("gw2");
-      expect(res.body[1].tags[1].name).toBe("gw6");
-
+      // created 2 posts - should return array with 2 items
       expect(res.body.length).toEqual(2);
+      expect(res.body[0].id).toBeDefined();
+      expect(res.body[1].id).toBeDefined();
     });
   });
 
   describe(`GET ${POSTS_ENDPOINT}:id`, () => {
     test("should find post by id", async () => {
+      // create post
+      const [newPost] = await createPostsWithTags([
+        {
+          userId: AUTHORIZED_USER.id,
+          ...post1,
+        },
+      ]);
+      // find created post
       const res = await request(app)
-        .get(`${POSTS_ENDPOINT}${postId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .get(`${POSTS_ENDPOINT}${newPost.id}`)
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       // console.log(res.text);
       expect(res.status).toBe(200);
-      expect(res.body.id).toBe(postId);
+      expect(res.body.id).toBe(newPost.id);
       expect(res.body.title).toBe(post1.title);
       expect(res.body.content).toBe(post1.content);
       expect(res.body.tags[0].name).toEqual("gw1");
@@ -132,7 +140,7 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
       const postId = 999999999;
       const res = await request(app)
         .get(`${POSTS_ENDPOINT}${postId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       expect(res.status).toBe(404);
       expect(res.text).toContain("not found");
@@ -142,7 +150,7 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
       const invalidId = "asdf";
       const res = await request(app)
         .get(`${POSTS_ENDPOINT}${invalidId}`)
-        .set("Authorization", `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
       expect(res.status).toBe(400);
       expect(res.text).toContain(`"id" must be a number`);

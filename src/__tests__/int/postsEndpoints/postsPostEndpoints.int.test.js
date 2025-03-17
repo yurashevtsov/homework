@@ -1,8 +1,7 @@
 const request = require("supertest");
 const app = require("@src/app");
-
 const POSTS_ENDPOINT = "/api/homework/posts/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const POST_TO_CREATE = {
   title: "some title",
@@ -20,21 +19,17 @@ const {
 } = require("../endpointsTestHelpers");
 
 describe(`POST ${POSTS_ENDPOINT}`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "postsEndpoint",
+      email: "postsEndpoint@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
   });
 
   afterAll(async () => {
@@ -47,12 +42,12 @@ describe(`POST ${POSTS_ENDPOINT}`, () => {
   test("Should create a post and tags", async () => {
     const res = await request(app)
       .post(POSTS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send(POST_TO_CREATE);
 
     // find the same post that was created
     const fetchedPost = (
-      await findPostWithTags(res.body.id, auhtorizedUser.id)
+      await findPostWithTags(res.body.id, AUTHORIZED_USER.id)
     ).toJSON();
 
     // created status
@@ -70,7 +65,7 @@ describe(`POST ${POSTS_ENDPOINT}`, () => {
       .map((tag) => tag.name)
       .every((tagName) => POST_TO_CREATE.tags.includes(tagName));
 
-    expect(includesAllCreatedTags).toBe(true); // checking tags after creation
+    expect(includesAllCreatedTags).toBe(true); // checking tags to exists in response
     expect(includesAllFetchedTags).toBe(true); // checking tags to be saved in DB
   });
 
@@ -109,7 +104,7 @@ describe(`POST ${POSTS_ENDPOINT}`, () => {
       testCases.map(async (testCase, index) => {
         const res = await request(app)
           .post(POSTS_ENDPOINT)
-          .set("Authorization", `Bearer ${authToken}`)
+          .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
           .send(testCase.body);
 
         if (

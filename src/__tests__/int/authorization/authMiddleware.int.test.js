@@ -6,10 +6,10 @@ const {
   closeDB,
   clearUserTable,
   createUser,
-} = require("../endpointsTestHelpers");
+} = require("@src/__tests__/int/endpointsTestHelpers");
 
 const USERS_ENDPOINT = "/api/homework/users/";
-const authTestHelper = require("./jwtTestHelper");
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 describe("Authorization middleware", () => {
   beforeAll(async () => {
@@ -25,6 +25,22 @@ describe("Authorization middleware", () => {
     await closeDB();
   });
 
+  test("should allow authorized users to access protected routes", async () => {
+    const newUser = await authTestHelper.createUserWithToken({
+      username: "validUsername",
+      email: "validemail@gmail.com",
+      password: "pass1234",
+      repeatPassword: "pass1234",
+    });
+
+    const res = await request(app)
+      .get(USERS_ENDPOINT)
+      .set("Authorization", `Bearer ${newUser.token}`);
+
+    // console.log(res.body);
+    expect(res.status).toBe(200);
+  });
+
   test("return 400 if token is not provided", async () => {
     const res = await request(app).get(USERS_ENDPOINT).set("Authorization", ``);
 
@@ -34,7 +50,10 @@ describe("Authorization middleware", () => {
 
   test("should return 400 if token does not have AUTHENTICATION scope", async () => {
     // create token with wrong scope
-    const wrongScopeToken = authTestHelper.encodeToken(123, "invalidScope");
+    const wrongScopeToken = authTestHelper.encodeToken(
+      { id: 123 },
+      "invalidScope"
+    );
 
     const res = await request(app)
       .get(USERS_ENDPOINT)
@@ -48,7 +67,7 @@ describe("Authorization middleware", () => {
   test("Shouldnt allow access if owner of JWT was deleted", async () => {
     const deletedUserId = 10;
     const deletedUserToken = authTestHelper.encodeToken(
-      deletedUserId,
+      { id: deletedUserId },
       "AUTHENTICATION"
     );
 
@@ -63,7 +82,7 @@ describe("Authorization middleware", () => {
 
   test("Shouldnt throw an error if token has expired", async () => {
     const expiredToken = authTestHelper.createExpiredToken(
-      10,
+      { id: 10 },
       "AUTHENTICATION"
     );
 
@@ -78,23 +97,25 @@ describe("Authorization middleware", () => {
 
   test("Should throw an error if user changed password after token was issued", async () => {
     // create user
-    const createdUser = await createUser({
-      username: "postUser",
-      email: "postuser@mail.com",
+    const createdUser = await authTestHelper.createUserWithToken({
+      username: "authUser",
+      email: "authuser@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-    const authToken = authTestHelper.createBackdateToken(
-      createdUser.id,
+    // imitate that user was created
+    const backDateToken = authTestHelper.createBackdateToken(
+      { id: createdUser.id },
       "AUTHENTICATION"
     );
+
     // change his password
     createdUser.set({ password: "pass4321" });
     await createdUser.save();
     // trying to access protected route
     const res = await request(app)
       .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${backDateToken}`);
 
     // console.log(res.text);
     expect(res.status).toBe(401);

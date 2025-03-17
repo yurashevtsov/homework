@@ -36,12 +36,12 @@ async function tokenAuthHandler(req, res, next) {
   }
 
   // 4. Make sure user still exists
-  const foundUser = await userService.getUserByIdNoError(payload.sub);
+  const foundUser = await userService.getUserByIdNoError(payload.id);
 
   if (!foundUser) {
     return next(new HttpBadRequestError("User doesnt exists Invalid token"));
   }
-
+  
   // 5. make sure user didnt change his password after token was issued
   const recentlyChangedPassword = jwtService.userChangedPasswordAfter(
     foundUser.changedPasswordAt,

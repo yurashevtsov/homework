@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("@src/app");
 
 const POSTS_ENDPOINT = "/api/homework/posts/";
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 const POST_TO_CREATE = {
   title: "some title",
@@ -20,26 +20,17 @@ const {
 } = require("../endpointsTestHelpers");
 
 describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
   beforeAll(async () => {
     await initDB();
 
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
-      username: "postUser",
-      email: "postuser@mail.com",
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "putEndpoint",
+      email: "putEndpoint@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
-
-    auhtorizedUser = signupRes.body.user;
-    authToken = signupRes.body.token;
-  });
-
-  afterAll(async () => {
-    await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
-    await closeDB();
   });
 
   afterEach(async () => {
@@ -48,26 +39,30 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
     await clearTagTable();
   });
 
+  afterAll(async () => {
+    await Promise.all([clearUserTable(), clearPostTable(), clearTagTable()]);
+    await closeDB();
+  });
+
   test("should update post data", async () => {
     const updatePostData = {
       title: "updated title",
       content: "updated content",
     };
     // create post that we can update
-    const createdPost = await createPostsWithTags([
-      { userId: auhtorizedUser.id, ...POST_TO_CREATE },
+    const [createdPost] = await createPostsWithTags([
+      { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
     // make sure that post was created
     const requiredFields = ["id", "userId", "title", "content", "tags"];
-
     requiredFields.forEach((field) => {
-      expect(createdPost[0]).toHaveProperty(field);
+      expect(createdPost).toHaveProperty(field);
     });
 
     // request to update created post
     const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${createdPost[0].id}`)
-      .set("Authorization", `Bearer ${authToken}`)
+      .put(`${POSTS_ENDPOINT}${createdPost.id}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send({
         title: updatePostData.title,
         content: updatePostData.content,
@@ -82,20 +77,19 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
   test("should update tags data", async () => {
     const tagsToUpdate = "yolo, fun";
     // create post that we can update
-    const createdPost = await createPostsWithTags([
-      { userId: auhtorizedUser.id, ...POST_TO_CREATE },
+    const [createdPost] = await createPostsWithTags([
+      { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
     // make sure that post was created
     const requiredFields = ["id", "userId", "title", "content", "tags"];
-
     requiredFields.forEach((field) => {
-      expect(createdPost[0]).toHaveProperty(field);
+      expect(createdPost).toHaveProperty(field);
     });
 
     // request to update created post
     const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${createdPost[0].id}`)
-      .set("Authorization", `Bearer ${authToken}`)
+      .put(`${POSTS_ENDPOINT}${createdPost.id}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send({
         tags: tagsToUpdate,
       });
@@ -116,26 +110,28 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
 
   test("should not update post that doesnt belong to him (404)", async () => {
     // create a post with tags by created user (before tests)
-    const firstUserPost = await createPostsWithTags([
-      { userId: auhtorizedUser.id, ...POST_TO_CREATE },
+    const [firstUserPost] = await createPostsWithTags([
+      { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
 
-    expect(firstUserPost[0].id).toBeDefined(); // expect post to be created by authorized user
+    // make sure that post was created
+    const requiredFields = ["id", "userId", "title", "content", "tags"];
+    requiredFields.forEach((field) => {
+      expect(firstUserPost).toHaveProperty(field);
+    });
 
     // create a new user
-    const signupRes = await request(app).post(SIGNUP_ENDPOINT).send({
+    const secondUser = await authTestHelper.createUserWithToken({
       username: "seconduser",
       email: "seconduser@mail.com",
       password: "pass1234",
       repeatPassword: "pass1234",
     });
 
-    // token should be present
-    expect(signupRes.body.token).toBeDefined();
     // use new token to edit post created by first user
     const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${firstUserPost[0].id}`)
-      .set("Authorization", `Bearer ${signupRes.body.token}`)
+      .put(`${POSTS_ENDPOINT}${firstUserPost.id}`)
+      .set("Authorization", `Bearer ${secondUser.token}`)
       .send({
         title: "Yoooooooo",
       });
@@ -149,7 +145,7 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
     const invalidId = "asdf";
     const updateRes = await request(app)
       .put(`${POSTS_ENDPOINT}${invalidId}`)
-      .set("Authorization", `Bearer ${authToken}`)
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
       .send({
         title: "Yoooooooo",
       });

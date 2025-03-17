@@ -8,41 +8,26 @@ const {
   closeDB,
 } = require("../endpointsTestHelpers");
 
-const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const USERS_ENDPOINT = "/api/homework/users/";
-
-const username = "sometestuser";
-const email = "unauthorizedtest@mail.com";
-const password = "pass1234";
-const repeatPassword = "pass1234";
-
-const NEW_USER_DATA = {
-  username,
-  email,
-  password,
-  repeatPassword,
-};
+const authTestHelper = require("@src/__tests__/int/authTestHelper");
 
 describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
-  let auhtorizedUser;
-  let authToken;
+  let AUTHORIZED_USER;
 
-  // Connecting to a database
   beforeAll(async () => {
     await initDB();
 
-    // Create user before testing authorization routes
-    const response = await request(app)
-      .post(SIGNUP_ENDPOINT)
-      .send(NEW_USER_DATA);
-
-    auhtorizedUser = response.body.user;
-    authToken = response.body.token;
+    AUTHORIZED_USER = await authTestHelper.createUserWithToken({
+      username: "postUser",
+      email: "postuser@mail.com",
+      password: "pass1234",
+      repeatPassword: "pass1234",
+    });
   });
 
   // CLEARING DB (not pre-defined user) after each test
   afterEach(async () => {
-    await partialUserTableClear(auhtorizedUser.id);
+    await partialUserTableClear(AUTHORIZED_USER.id);
   });
 
   afterAll(async () => {
@@ -52,7 +37,7 @@ describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
   });
 
   test("Should fail authentication with invalid token", async () => {
-    const forgedToken = "a" + authToken.slice(1);
+    const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
 
     const res = await request(app)
       .get(USERS_ENDPOINT)
@@ -72,7 +57,7 @@ describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
     // deleting user
     const res = await request(app)
       .delete(`${USERS_ENDPOINT}${userToDelete.id}`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
     // dont expect any errors
     expect(res.status).toBe(204);
   });
@@ -80,7 +65,7 @@ describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
   test("should return 404 if non-existing user", async () => {
     const res = await request(app)
       .delete(`${USERS_ENDPOINT}99999999999999`)
-      .set("Authorization", `Bearer ${authToken}`);
+      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
 
     // uncomment to see error message
     // console.log(res.text);
