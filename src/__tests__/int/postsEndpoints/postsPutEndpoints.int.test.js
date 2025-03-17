@@ -1,8 +1,8 @@
-const request = require("supertest");
-const app = require("@src/app");
-
-const POSTS_ENDPOINT = "/api/homework/posts/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const {
+  API,
+  POSTS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/postApiRequest");
 
 const POST_TO_CREATE = {
   title: "some title",
@@ -53,20 +53,13 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
     const [createdPost] = await createPostsWithTags([
       { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
-    // make sure that post was created
-    const requiredFields = ["id", "userId", "title", "content", "tags"];
-    requiredFields.forEach((field) => {
-      expect(createdPost).toHaveProperty(field);
-    });
 
     // request to update created post
-    const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${createdPost.id}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
-        title: updatePostData.title,
-        content: updatePostData.content,
-      });
+    const updateRes = await API.updatePost(
+      createdPost.id,
+      AUTHORIZED_USER.token,
+      updatePostData
+    );
 
     // console.log(updateRes.text);
     expect(updateRes.status).toBe(200);
@@ -80,19 +73,13 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
     const [createdPost] = await createPostsWithTags([
       { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
-    // make sure that post was created
-    const requiredFields = ["id", "userId", "title", "content", "tags"];
-    requiredFields.forEach((field) => {
-      expect(createdPost).toHaveProperty(field);
-    });
 
     // request to update created post
-    const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${createdPost.id}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
-        tags: tagsToUpdate,
-      });
+    const updateRes = await API.updatePost(
+      createdPost.id,
+      AUTHORIZED_USER.token,
+      { tags: tagsToUpdate }
+    );
 
     // console.log(updateRes.text);
 
@@ -114,12 +101,6 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
       { userId: AUTHORIZED_USER.id, ...POST_TO_CREATE },
     ]);
 
-    // make sure that post was created
-    const requiredFields = ["id", "userId", "title", "content", "tags"];
-    requiredFields.forEach((field) => {
-      expect(firstUserPost).toHaveProperty(field);
-    });
-
     // create a new user
     const secondUser = await authTestHelper.createUserWithToken({
       username: "seconduser",
@@ -129,12 +110,9 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
     });
 
     // use new token to edit post created by first user
-    const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${firstUserPost.id}`)
-      .set("Authorization", `Bearer ${secondUser.token}`)
-      .send({
-        title: "Yoooooooo",
-      });
+    const updateRes = await API.updatePost(firstUserPost.id, secondUser.token, {
+      title: "Yoho",
+    });
 
     // console.log(updateRes.text);
     expect(updateRes.status).toBe(404); // get 404 error
@@ -143,12 +121,9 @@ describe(`PUT ${POSTS_ENDPOINT}:id`, () => {
 
   test("should throw an error on invalid id", async () => {
     const invalidId = "asdf";
-    const updateRes = await request(app)
-      .put(`${POSTS_ENDPOINT}${invalidId}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send({
-        title: "Yoooooooo",
-      });
+    const updateRes = await API.updatePost(invalidId, AUTHORIZED_USER.token, {
+      title: "Yo",
+    });
 
     expect(updateRes.status).toBe(400);
     expect(updateRes.text).toBe(`"id" must be a number`);

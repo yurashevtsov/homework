@@ -1,8 +1,8 @@
-const request = require("supertest");
-const app = require("@src/app");
-
-const POSTS_ENDPOINT = "/api/homework/posts/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const {
+  API,
+  POSTS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/postApiRequest");
 
 const {
   initDB,
@@ -52,9 +52,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
 
     expect(newPost.id).toBeDefined();
     // 2.delete post
-    const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}${newPost.id}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+    const res = await API.deletePost(newPost.id, AUTHORIZED_USER.token);
 
     expect(res.status).toBe(204);
   });
@@ -80,9 +78,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
     });
 
     // trying to delete original post with second user
-    const deleteRes = await request(app)
-      .delete(`${POSTS_ENDPOINT}${firstUserPost.id}`)
-      .set("Authorization", `Bearer ${secondUser.token}`);
+    const deleteRes = await API.deletePost(firstUserPost.id, secondUser.token);
 
     // console.log(deleteRes.text);
     expect(deleteRes.status).toBe(404);
@@ -91,9 +87,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
 
   test("Should return 404 if post doesnt exists", async () => {
     const nonExistingId = 999999999;
-    const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}${nonExistingId}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+    const res = await API.deletePost(nonExistingId, AUTHORIZED_USER.token);
 
     // console.log(res.text);
     expect(res.status).toBe(404);
@@ -102,10 +96,7 @@ describe(`DELETE ${POSTS_ENDPOINT}`, () => {
 
   test("should throw an error on invalid id", async () => {
     const invalidId = "asd";
-    const res = await request(app)
-      .delete(`${POSTS_ENDPOINT}${invalidId}`)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
-
+    const res = await API.deletePost(invalidId, AUTHORIZED_USER.token);
     // console.log(res.text);
     expect(res.status).toBe(400);
     expect(res.text).toContain(`"id" must be a number`); // Post with that id 9999999999999999999 is not found

@@ -5,7 +5,7 @@ const {
   initDB,
 } = require("../endpointsTestHelpers");
 
-const { API, LOGIN_ENDPOINT } = require("@src/__tests__/int/apiRequests");
+const { API, LOGIN_ENDPOINT } = require("@src/__tests__/int/apiRequests/userApiRequests");
 
 describe("Login endpoint", () => {
   beforeAll(async () => {

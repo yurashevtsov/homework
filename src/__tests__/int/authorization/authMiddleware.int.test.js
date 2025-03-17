@@ -7,8 +7,11 @@ const {
   clearUserTable,
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
-const USERS_ENDPOINT = "/api/homework/users/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const {
+  API,
+  USERS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/userApiRequests");
 
 describe("Authorization middleware", () => {
   beforeAll(async () => {
@@ -32,16 +35,14 @@ describe("Authorization middleware", () => {
       repeatPassword: "pass1234",
     });
 
-    const res = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${newUser.token}`);
+    const res = await API.getAllUsers(newUser.token);
 
     // console.log(res.body);
     expect(res.status).toBe(200);
   });
 
   test("return 400 if token is not provided", async () => {
-    const res = await request(app).get(USERS_ENDPOINT).set("Authorization", ``);
+    const res = await API.getAllUsers("");
 
     expect(res.status).toBe(400);
     expect(res.text).toContain("Invalid token or it doesnt exists");
@@ -54,9 +55,7 @@ describe("Authorization middleware", () => {
       "invalidScope"
     );
 
-    const res = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${wrongScopeToken}`);
+    const res = await API.getAllUsers(wrongScopeToken);
 
     // console.log(res.text);
     expect(res.status).toBe(400);
@@ -70,9 +69,7 @@ describe("Authorization middleware", () => {
       "AUTHENTICATION"
     );
 
-    const res = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${deletedUserToken}`);
+    const res = await API.getAllUsers(deletedUserToken);
 
     // console.log(res.text);
     expect(res.status).toBe(400);
@@ -85,9 +82,7 @@ describe("Authorization middleware", () => {
       "AUTHENTICATION"
     );
 
-    const res = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${expiredToken}`);
+    const res = await API.getAllUsers(expiredToken);
 
     // console.log(res.text);
     expect(res.status).toBe(401);
@@ -112,9 +107,7 @@ describe("Authorization middleware", () => {
     createdUser.set({ password: "pass4321" });
     await createdUser.save();
     // trying to access protected route
-    const res = await request(app)
-      .get(USERS_ENDPOINT)
-      .set("Authorization", `Bearer ${backDateToken}`);
+    const res = await API.getAllUsers(backDateToken);
 
     // console.log(res.text);
     expect(res.status).toBe(401);

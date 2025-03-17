@@ -6,7 +6,10 @@ const {
   createUser,
 } = require("../endpointsTestHelpers");
 
-const { API, SIGNUP_ENDPOINT } = require("@src/__tests__/int/apiRequests");
+const {
+  API,
+  SIGNUP_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/userApiRequests");
 
 const NEW_USER_DATA = {
   username: "signupUser",

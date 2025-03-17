@@ -4,7 +4,6 @@ const app = require("@src/app");
 const SIGNUP_ENDPOINT = "/api/homework/users/signup";
 const LOGIN_ENDPOINT = "/api/homework/users/login";
 const USERS_ENDPOINT = "/api/homework/users/";
-const POSTS_ENDPOINT = "/api/homework/posts/";
 
 const API = {
   /**

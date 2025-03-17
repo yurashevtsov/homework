@@ -1,6 +1,3 @@
-const request = require("supertest");
-const app = require("@src/app");
-const POSTS_ENDPOINT = "/api/homework/posts/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
 const {
   initDB,
@@ -10,6 +7,11 @@ const {
   createPostsWithTags,
   clearUserTable,
 } = require("../endpointsTestHelpers");
+
+const {
+  API,
+  POSTS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/postApiRequest");
 
 const post1 = {
   title: "random1",
@@ -80,9 +82,7 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
   describe(`GET ${POSTS_ENDPOINT}`, () => {
     test("should fail when unauthorized", async () => {
       const forgedToken = "a" + AUTHORIZED_USER.token.slice(1);
-      const res = await request(app)
-        .get(POSTS_ENDPOINT)
-        .set("Authorization", `Bearer ${forgedToken}`);
+      const res = await API.getAllPosts(forgedToken);
 
       expect(res.status).toBe(400);
       expect(res.text).toContain("invalid token");
@@ -101,10 +101,7 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
         },
       ]);
 
-      const res = await request(app)
-        .get(POSTS_ENDPOINT)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
-
+      const res = await API.getAllPosts(AUTHORIZED_USER.token);
       // console.log(res.text);
       // created 2 posts - should return array with 2 items
       expect(res.body.length).toEqual(2);
@@ -123,9 +120,7 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
         },
       ]);
       // find created post
-      const res = await request(app)
-        .get(`${POSTS_ENDPOINT}${newPost.id}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOnePost(newPost.id, AUTHORIZED_USER.token);
 
       // console.log(res.text);
       expect(res.status).toBe(200);
@@ -138,19 +133,15 @@ describe(`GET ${POSTS_ENDPOINT} endpoints`, () => {
 
     test("should throw 404 if post doesnt exists", async () => {
       const postId = 999999999;
-      const res = await request(app)
-        .get(`${POSTS_ENDPOINT}${postId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOnePost(postId, AUTHORIZED_USER.token);
 
       expect(res.status).toBe(404);
       expect(res.text).toContain("not found");
     });
 
-    test("should throw an error", async () => {
+    test("should throw an error on invalid id", async () => {
       const invalidId = "asdf";
-      const res = await request(app)
-        .get(`${POSTS_ENDPOINT}${invalidId}`)
-        .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`);
+      const res = await API.getOnePost(invalidId, AUTHORIZED_USER.token);
 
       expect(res.status).toBe(400);
       expect(res.text).toContain(`"id" must be a number`);

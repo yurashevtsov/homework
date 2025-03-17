@@ -9,7 +9,10 @@ const {
 } = require("../endpointsTestHelpers");
 
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
-const { API, USERS_ENDPOINT } = require("@src/__tests__/int/apiRequests");
+const {
+  API,
+  USERS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/userApiRequests");
 
 describe(`DELETE ${USERS_ENDPOINT}:id`, () => {
   let AUTHORIZED_USER;

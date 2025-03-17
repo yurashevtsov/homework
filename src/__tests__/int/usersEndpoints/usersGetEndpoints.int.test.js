@@ -5,7 +5,10 @@ const {
 } = require("@src/__tests__/int/endpointsTestHelpers");
 
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
-const {API, USERS_ENDPOINT} = require("@src/__tests__/int/apiRequests");
+const {
+  API,
+  USERS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/userApiRequests");
 
 describe("Endpoint require authorization", () => {
   let AUTHORIZED_USER;

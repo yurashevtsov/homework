@@ -1,7 +1,8 @@
-const request = require("supertest");
-const app = require("@src/app");
-const POSTS_ENDPOINT = "/api/homework/posts/";
 const authTestHelper = require("@src/__tests__/int/authTestHelper");
+const {
+  API,
+  POSTS_ENDPOINT,
+} = require("@src/__tests__/int/apiRequests/postApiRequest");
 
 const POST_TO_CREATE = {
   title: "some title",
@@ -40,10 +41,7 @@ describe(`POST ${POSTS_ENDPOINT}`, () => {
   });
 
   test("Should create a post and tags", async () => {
-    const res = await request(app)
-      .post(POSTS_ENDPOINT)
-      .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-      .send(POST_TO_CREATE);
+    const res = await API.createPost(POST_TO_CREATE, AUTHORIZED_USER.token);
 
     // find the same post that was created
     const fetchedPost = (
@@ -102,10 +100,7 @@ describe(`POST ${POSTS_ENDPOINT}`, () => {
 
     await Promise.all(
       testCases.map(async (testCase, index) => {
-        const res = await request(app)
-          .post(POSTS_ENDPOINT)
-          .set("Authorization", `Bearer ${AUTHORIZED_USER.token}`)
-          .send(testCase.body);
+        const res = await API.createPost(testCase.body, AUTHORIZED_USER.token);
 
         if (
           res.status !== 400 ||
