@@ -7,6 +7,7 @@ const catchAsync = require("@src/utils/catchAsync.js");
 const {
   HttpBadRequestError,
   HttpUnauthorizedError,
+  HttpNotFoundError,
 } = require("@src/utils/httpErrors");
 
 async function tokenAuthHandler(req, res, next) {
@@ -24,7 +25,7 @@ async function tokenAuthHandler(req, res, next) {
   }
 
   if (!token) {
-    return next(new HttpBadRequestError("Invalid token or it doesnt exists"));
+    return next(new HttpUnauthorizedError("Token is missing"));
   }
 
   // 2.decode token
@@ -32,16 +33,18 @@ async function tokenAuthHandler(req, res, next) {
 
   // 3. Make sure scope contains - AUTHENTICATION
   if (!payload?.scope.includes("AUTHENTICATION")) {
-    return next(new HttpBadRequestError("Invalid token"));
+    return next(
+      new HttpUnauthorizedError("Token does not have required scope")
+    );
   }
 
   // 4. Make sure user still exists
   const foundUser = await userService.getUserByIdNoError(payload.id);
 
   if (!foundUser) {
-    return next(new HttpBadRequestError("User doesnt exists Invalid token"));
+    return next(new HttpNotFoundError("User not found"));
   }
-  
+
   // 5. make sure user didnt change his password after token was issued
   const recentlyChangedPassword = jwtService.userChangedPasswordAfter(
     foundUser.changedPasswordAt,

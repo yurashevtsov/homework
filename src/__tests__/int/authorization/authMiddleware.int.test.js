@@ -44,8 +44,8 @@ describe("Authorization middleware", () => {
   test("return 400 if token is not provided", async () => {
     const res = await API.getAllUsers("");
 
-    expect(res.status).toBe(400);
-    expect(res.text).toContain("Invalid token or it doesnt exists");
+    expect(res.status).toBe(401);
+    expect(res.text).toContain("Token is missing");
   });
 
   test("should return 400 if token does not have AUTHENTICATION scope", async () => {
@@ -58,8 +58,8 @@ describe("Authorization middleware", () => {
     const res = await API.getAllUsers(wrongScopeToken);
 
     // console.log(res.text);
-    expect(res.status).toBe(400);
-    expect(res.text).toContain("Invalid token");
+    expect(res.status).toBe(401);
+    expect(res.text).toContain("Token does not have required scope");
   });
 
   test("Shouldnt allow access if owner of JWT was deleted", async () => {
@@ -72,8 +72,8 @@ describe("Authorization middleware", () => {
     const res = await API.getAllUsers(deletedUserToken);
 
     // console.log(res.text);
-    expect(res.status).toBe(400);
-    expect(res.text).toContain("Invalid token");
+    expect(res.status).toBe(404);
+    expect(res.text).toContain("User not found");
   });
 
   test("Shouldnt throw an error if token has expired", async () => {
